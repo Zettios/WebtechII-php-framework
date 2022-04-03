@@ -1,9 +1,11 @@
 <?php
 
-namespace vendor\autoloader;
+spl_autoload_register('autoLoader');
 
-spl_autoload_register(function ($className) {
-    include dirname(__DIR__)."\\".$className.'.php';
-});
+function autoLoader($className) {
+    $extension = ".php";
+    $fullPath = $className . $extension;
+    echo $fullPath;
 
-$test = new \test\Class1();
+    include_once $fullPath;
+}
