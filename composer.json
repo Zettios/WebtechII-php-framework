@@ -1,0 +1,23 @@
+{
+    "name": "webtek/core",
+    "description": "PHP MVC framework from scratch",
+    "require": {
+        "psr/http-message": "^1.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "psr/http-factory": "^1.0"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Webtek\\Core\\": "core/",
+            "App\\": "src"
+        }
+    },
+    "authors": [
+        {
+            "name": "Ebbe Zeinstra",
+            "email": "e.k.zeinstra@st.hanze.nl"
+        }
+    ]
+}
