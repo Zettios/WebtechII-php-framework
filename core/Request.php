@@ -1,3 +1,3 @@
 <?php
 
-echo 't';
+namespace Webtek\Core;
