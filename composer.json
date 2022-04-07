@@ -10,8 +10,9 @@
     },
     "autoload": {
         "psr-4": {
-            "App\\": "src",
-            "Webtek\\Core\\": "core"
+            "Webtek\\Controllers\\": "./controllers",
+            "Webtek\\Core\\": "./core",
+            "App\\": "./src"
         }
     },
     "authors": [
