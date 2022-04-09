@@ -1,0 +1,9 @@
+{
+  "GET": {
+    "/": "home",
+    "/test": "test"
+  },
+  "POST": {
+    "/test": "test"
+  }
+}
