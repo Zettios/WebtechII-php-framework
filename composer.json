@@ -10,7 +10,6 @@
     },
     "autoload": {
         "psr-4": {
-            "Webtek\\Controllers\\": "./controllers",
             "Webtek\\Core\\": "./core",
             "App\\": "./src"
         }
