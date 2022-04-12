@@ -7,19 +7,21 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-class Request extends AbstractMessage implements RequestInterface {
+class Request implements RequestInterface {
+    use MessageTrait;
+
     private const AVAILABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
     private string $method;
     private Uri $uri;
 
     public function __construct(string $protocolVersion,  
-                                array $headers = [],
+                                array $headers,
                                 StreamInterface $body,
                                 string $method,
                                 UriInterface $uri)
     {
-        parent::__construct($protocolVersion, $headers, $body);
+        $this->setMessage($protocolVersion, $headers, $body);
         $this->method = $method;
         $this->uri = $uri;
     }
@@ -40,7 +42,7 @@ class Request extends AbstractMessage implements RequestInterface {
      *
      * @return string
      */
-    public function getRequestTarget()
+    public function getRequestTarget(): string
     {
         return isset($this->requestTarget) ? $this->requestTarget : "/";
     }
@@ -62,7 +64,7 @@ class Request extends AbstractMessage implements RequestInterface {
      * @param mixed $requestTarget
      * @return static
      */
-    public function withRequestTarget($requestTarget)
+    public function withRequestTarget($requestTarget): self
     {
         // TODO: Implement withRequestTarget() method.
     }
@@ -92,7 +94,7 @@ class Request extends AbstractMessage implements RequestInterface {
      * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod($method)
+    public function withMethod($method): self
     {
         if (!array_key_exists($method, self::AVAILABLE_METHODS)) {
             throw new \InvalidArgumentException("Provided method is a invalid HTTP method."); 
@@ -148,7 +150,7 @@ class Request extends AbstractMessage implements RequestInterface {
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return static
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): self
     {
         $new = clone $this;
         if ($preserveHost) {

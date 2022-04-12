@@ -5,8 +5,9 @@ namespace Webtek\Core;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
-class Response extends AbstractMessage implements ResponseInterface
+class Response implements ResponseInterface
 {
+    use MessageTrait;
 
     private array $statusTexts = [
         100 => 'Continue',
@@ -77,12 +78,12 @@ class Response extends AbstractMessage implements ResponseInterface
     private string $reasonPhrase;
 
     public function __construct(string $protocolVersion,
-                                array $headers = [],
+                                array $headers,
                                 StreamInterface $body,
                                 int $statusCode,
                                 string $reasonPhrase)
     {
-        parent::__construct($protocolVersion, $headers, $body);
+        $this->setMessage($protocolVersion, $headers, $body);
         $this->statusCode = $statusCode;
         $this->reasonPhrase = $reasonPhrase;
     }
@@ -95,7 +96,7 @@ class Response extends AbstractMessage implements ResponseInterface
      *
      * @return int Status code.
      */
-    public function getStatusCode()
+    public function getStatusCode(): int
     {
         return $this->statusCode;
     }
@@ -120,7 +121,7 @@ class Response extends AbstractMessage implements ResponseInterface
      * @return static
      * @throws \InvalidArgumentException For invalid status code arguments.
      */
-    public function withStatus($code, $reasonPhrase = '')
+    public function withStatus($code, $reasonPhrase = ''): self
     {
         if (!array_key_exists($code, $this->statusTexts)) {
             throw new \InvalidArgumentException("Result code doesn't exists.");
@@ -146,7 +147,7 @@ class Response extends AbstractMessage implements ResponseInterface
      * @link http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
      * @return string Reason phrase; must return an empty string if none present.
      */
-    public function getReasonPhrase()
+    public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
     }
