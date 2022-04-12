@@ -20,24 +20,41 @@ class HttpFactory implements
     StreamFactoryInterface 
 {
 
-    public function makeObjects(): MessageInterface
-    {
+    /**
+     * Schrijf dit op voor morgen:
+     * Het idee dat ik hier nu bij heb is dat er minimaal een Request en Response object uit moet komen.
+     * Handig om eerst met die twee dingen te beginnen zodat het niet te overwhelmend is.
+     * Stap 1: Check of er een request methode is, zo ja maak request. Check of er een response code is, zo ja maak response
+     * Stap 2: Met een functie moeten deze objecten (of object) worden aangemaakt.
+     * Stap 2.1: Met deze functie word met de hand van de superglobals een Uri object gemaakt en doorgegeven aan de createRequest methode
+     * Stap 2.2: Met deze functie word aan de hand van php functies een response object gemaakt met createResponse
+     * Stap 3: Controleren of de huidige implementatie van onze Request en Response object goed is (volgens mij moet er nog wat aanpassingen komen)
+     * Stap 4: Wanneer de objecten zijn gemaakt, geef ze terug. De functie die ze aanmaakt moet dus één of beide terug geven.
+     *
+     * Neem nu rust omdat moe.
+     */
 
-        $server = $_SERVER;
-        $post = $_POST;
-        $get = $_GET;
 
-        if (!isset($_SERVER['HTTP_CONTENT_TYPE'])) {
-            //string $method, $uri, array $serverParams = []
-            $serverParams = [];
-            foreach ($_SERVER as $parm => $value){
-                $serverParams[$parm] = $value;
-            } 
 
-            $serverRequest = createServerRequest($server['REQUEST_METHOD'], $server['REQUEST_URI'], $serverParams);
-            return $serverRequest;
-        }
-    }
+
+//    public function makeObjects(): MessageInterface
+//    {
+//
+//        $server = $_SERVER;
+//        $post = $_POST;
+//        $get = $_GET;
+//
+//        if (!isset($_SERVER['HTTP_CONTENT_TYPE'])) {
+//            //string $method, $uri, array $serverParams = []
+//            $serverParams = [];
+//            foreach ($_SERVER as $parm => $value){
+//                $serverParams[$parm] = $value;
+//            }
+//
+//            $serverRequest = createServerRequest($server['REQUEST_METHOD'], $server['REQUEST_URI'], $serverParams);
+//            return $serverRequest;
+//        }
+//    }
 
     /**
      * Create a new request.
@@ -51,7 +68,39 @@ class HttpFactory implements
      */
     public function createRequest(string $method, UriInterface|string $uri): RequestInterface
     {
-        return new Request('1.1', [], null, $method, $uri);
+        $server = $_SERVER;
+        $headers = [];
+        foreach ($_SERVER as $parm => $value){
+            $headers[$parm] = $value;
+        }
+
+        return new Request( $server['REQUEST_METHOD'],
+                            $server['REQUEST_URI'],
+                            $server['SERVER_PROTOCOL'],
+                            $headers,
+                            $uri);
+    }
+
+
+    /**
+     * Create a new server request.
+     *
+     * Note that server-params are taken precisely as given - no parsing/processing
+     * of the given values is performed, and, in particular, no attempt is made to
+     * determine the HTTP method or URI, which must be provided explicitly.
+     *
+     * @param string $method The HTTP method associated with the request.
+     * @param UriInterface|string $uri The URI associated with the request. If
+     *     the value is a string, the factory MUST create a UriInterface
+     *     instance based on it.
+     * @param array $serverParams Array of SAPI parameters with which to seed
+     *     the generated request instance.
+     *
+     * @return ServerRequestInterface
+     */
+    public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
+    {
+        //return new ServerRequest(null, null, null, $method, $uri, $serverParams);
     }
 
     /**
@@ -115,26 +164,5 @@ class HttpFactory implements
     public function createStreamFromResource($resource): StreamInterface
     {
         // TODO: Implement createStreamFromResource() method.
-    }
-
-    /**
-     * Create a new server request.
-     *
-     * Note that server-params are taken precisely as given - no parsing/processing
-     * of the given values is performed, and, in particular, no attempt is made to
-     * determine the HTTP method or URI, which must be provided explicitly.
-     *
-     * @param string $method The HTTP method associated with the request.
-     * @param UriInterface|string $uri The URI associated with the request. If
-     *     the value is a string, the factory MUST create a UriInterface
-     *     instance based on it.
-     * @param array $serverParams Array of SAPI parameters with which to seed
-     *     the generated request instance.
-     *
-     * @return ServerRequestInterface
-     */
-    public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
-    {
-        //return new ServerRequest(null, null, null, $method, $uri, $serverParams);
     }
 }

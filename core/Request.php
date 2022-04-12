@@ -15,18 +15,58 @@ class Request implements RequestInterface {
     private string $method;
     private Uri $uri;
 
-    public function __construct(string $protocolVersion,  
+    public function __construct(string $method,
+                                string|UriInterface $uri,
+                                string $protocolVersion,
                                 array $headers,
-                                StreamInterface $body,
-                                string $method,
-                                string|UriInterface $uri)
+                                StreamInterface $body)
     {
-        $this->setMessage($protocolVersion, $headers, $body);
         $this->method = $method;
+
         if (gettype($uri) == "string") {
             $uri = new Uri('http', '/'); // <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
+        } else {
+            $this->uri = $uri;
         }
-        $this->uri = $uri;
+
+        $this->setMessage($protocolVersion, $headers, $body);
+    }
+
+    /**
+     * Retrieves the HTTP method of the request.
+     *
+     * @return string Returns the request method.
+     */
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
+    /**
+     * Return an instance with the provided HTTP method.
+     *
+     * While HTTP method names are typically all uppercase characters, HTTP
+     * method names are case-sensitive and thus implementations SHOULD NOT
+     * modify the given string.
+     *
+     * This method MUST be implemented in such a way as to retain the
+     * immutability of the message, and MUST return an instance that has the
+     * changed request method.
+     *
+     * @param string $method Case-sensitive method.
+     * @return static
+     * @throws \InvalidArgumentException for invalid HTTP methods.
+     */
+    public function withMethod($method): self
+    {
+        if (!array_key_exists($method, self::AVAILABLE_METHODS)) {
+            throw new \InvalidArgumentException("Provided method is a invalid HTTP method.");
+        }
+
+        $new = clone $this;
+        $new->method = $method;
+
+        return $new;
     }
 
     /**
@@ -70,43 +110,6 @@ class Request implements RequestInterface {
     public function withRequestTarget($requestTarget): self
     {
         // TODO: Implement withRequestTarget() method.
-    }
-
-    /**
-     * Retrieves the HTTP method of the request.
-     *
-     * @return string Returns the request method.
-     */
-    public function getMethod(): string
-    {
-        return $this->method;
-    }
-
-    /**
-     * Return an instance with the provided HTTP method.
-     *
-     * While HTTP method names are typically all uppercase characters, HTTP
-     * method names are case-sensitive and thus implementations SHOULD NOT
-     * modify the given string.
-     *
-     * This method MUST be implemented in such a way as to retain the
-     * immutability of the message, and MUST return an instance that has the
-     * changed request method.
-     *
-     * @param string $method Case-sensitive method.
-     * @return static
-     * @throws \InvalidArgumentException for invalid HTTP methods.
-     */
-    public function withMethod($method): self
-    {
-        if (!array_key_exists($method, self::AVAILABLE_METHODS)) {
-            throw new \InvalidArgumentException("Provided method is a invalid HTTP method."); 
-        }
-        
-        $new = clone $this;
-        $new->method = $method;
-
-        return $new;
     }
 
     /**
