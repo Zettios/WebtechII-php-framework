@@ -19,10 +19,13 @@ class Request implements RequestInterface {
                                 array $headers,
                                 StreamInterface $body,
                                 string $method,
-                                UriInterface $uri)
+                                string|UriInterface $uri)
     {
         $this->setMessage($protocolVersion, $headers, $body);
         $this->method = $method;
+        if (gettype($uri) == "string") {
+            $uri = new Uri('http', '/'); // <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
+        }
         $this->uri = $uri;
     }
 
