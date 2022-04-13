@@ -12,11 +12,11 @@ trait MessageTrait {
 
     private string $protocolVersion;
     private array $headers = [];
-    private StreamInterface $body;
+    private array $body;
 
     public function setMessage(string $protocolVersion,
                                 array $headers,
-                                StreamInterface $body)
+                                array $body)
     {
         $this->protocolVersion = $protocolVersion;
         foreach ($headers as $key => $value) {
@@ -37,6 +37,9 @@ trait MessageTrait {
      */
     public function getProtocolVersion(): string
     {
+        if (!in_array($this->protocolVersion, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
+            throw new \InvalidArgumentException("Protocol version is not supported. Please set another protocol version.");
+        }
         return $this->protocolVersion;
     }
 
@@ -55,7 +58,7 @@ trait MessageTrait {
      */
     public function withProtocolVersion($version): self
     {
-        if (!in_array($version, self::AVAILABLE_PROTOCOL_VERSIONS)) {
+        if (!in_array($version, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
             throw new \InvalidArgumentException("Protocol version is not supported.");
         }
         $new = clone $this;
@@ -242,6 +245,11 @@ trait MessageTrait {
      */
     public function getBody(): StreamInterface
     {
+        // TODO: Implement getBody() method.
+    }
+
+    public function getBodyAsArray(): array
+    {
         return $this->body;
     }
 
@@ -262,6 +270,31 @@ trait MessageTrait {
     {
         if (!($body instanceof StreamInterface)) {
             throw new \InvalidArgumentException("Provided body is not a StreamInterface.");
+        }
+
+        $new = clone $this;
+        $new->body = $body;
+
+        return $new;
+    }
+
+    /**
+     * Return an instance with the specified message body.
+     *
+     * The body MUST be a StreamInterface object.
+     *
+     * This method MUST be implemented in such a way as to retain the
+     * immutability of the message, and MUST return a new instance that has the
+     * new body stream.
+     *
+     * @param StreamInterface $body Body.
+     * @return static
+     * @throws \InvalidArgumentException When the body is not valid.
+     */
+    public function withBodyAsArray(array $body): self
+    {
+        if (!(is_array($body))) {
+            throw new \InvalidArgumentException("Provided body is not an array.");
         }
 
         $new = clone $this;

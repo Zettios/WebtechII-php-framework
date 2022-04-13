@@ -28,7 +28,7 @@ use Psr\Http\Message\UriInterface;
 class Uri implements UriInterface {
     private const AVAILABLE_SCHEMES = ["http", "https"];
 
-    private string $scheme;
+    private ?string $scheme;
     private string $path;
     private ?int $port;
     private ?string $host;
@@ -36,18 +36,18 @@ class Uri implements UriInterface {
     private ?string $query;
     private ?string $fragment;
     
-    public function __construct(string $schema,
-                                string $path,
-                                int $port = null,
-                                string $host = null,
+    public function __construct(string $schema = null,
                                 string $userInfo = null,
+                                string $host = null,
+                                int $port = null,
+                                string $path,
                                 string $query = null,
                                 string $fragment = null)
     {
         $this->scheme = $schema;
-        $this->port = $port;
-        $this->host = $host;
         $this->userInfo = $userInfo;
+        $this->host = $host;
+        $this->port = $port;
         $this->path = $path;
         $this->query = $query;
         $this->fragment = $fragment;
@@ -68,40 +68,11 @@ class Uri implements UriInterface {
      * @return string The URI scheme.
      */
     public function getScheme() {
-        return $this->scheme;
-    }
-
-    /**
-     * Retrieve the authority component of the URI.
-     *
-     * If no authority information is present, this method MUST return an empty
-     * string.
-     *
-     * The authority syntax of the URI is:
-     *
-     * <pre>
-     * [user-info@]host[:port]
-     * </pre>
-     *
-     * If the port component is not set or is the standard port for the current
-     * scheme, it SHOULD NOT be included.
-     *
-     * @see https://tools.ietf.org/html/rfc3986#section-3.2
-     * @return string The URI authority, in "[user-info@]host[:port]" format.
-     */
-    public function getAuthority() {
-        $authority = "";
-        if (isset($this->userInfo)) {
-            $authority = $this->userInfo . "@";
+        if ($this->scheme === null){
+            return self::AVAILABLE_SCHEMES[0];
+        } else {
+            return $this->scheme;
         }
-
-        $authority .= $this->host;
-
-        if (isset($this->port)) {
-            $authority .= ":" . $this->port;
-        }
-
-        return $authority;
     }
 
     /**
@@ -138,6 +109,8 @@ class Uri implements UriInterface {
         return isset($this->host) ? $this->host : "";
     }
 
+
+
     /**
      * Retrieve the port component of the URI.
      *
@@ -155,6 +128,40 @@ class Uri implements UriInterface {
      */
     public function getPort() {
         return $this->port;
+    }
+
+
+    /**
+     * Retrieve the authority component of the URI.
+     *
+     * If no authority information is present, this method MUST return an empty
+     * string.
+     *
+     * The authority syntax of the URI is:
+     *
+     * <pre>
+     * [user-info@]host[:port]
+     * </pre>
+     *
+     * If the port component is not set or is the standard port for the current
+     * scheme, it SHOULD NOT be included.
+     *
+     * @see https://tools.ietf.org/html/rfc3986#section-3.2
+     * @return string The URI authority, in "[user-info@]host[:port]" format.
+     */
+    public function getAuthority() {
+        $authority = "";
+        if (isset($this->userInfo)) {
+            $authority = $this->userInfo . "@";
+        }
+
+        $authority .= $this->host;
+
+        if (isset($this->port)) {
+            $authority .= ":" . $this->port;
+        }
+
+        return $authority;
     }
 
     /**

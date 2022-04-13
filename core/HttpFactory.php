@@ -2,6 +2,7 @@
 
 namespace Webtek\Core;
 
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -33,26 +34,44 @@ class HttpFactory implements
      * Neem nu rust omdat moe.
      */
 
-    private static int $REQUEST = 1;
-    private static int $RESPONSE = 2;
+    const REQUEST = 1;
+    const RESPONSE = 2;
 
-    public function makeObjects(int $selector): ServerRequestInterface
+    public function makeObjects(int $selector): ?MessageInterface
     {
         switch($selector) {
             case 1:
                 $requestMethod = $_SERVER['REQUEST_METHOD'];
                 $uri = $_SERVER['REQUEST_URI'];
-                $request = $this->createServerRequest($requestMethod, $uri);  //Server request beter te gebruiken dan request, omdat het rijker is
+                $request = $this->createServerRequest($requestMethod, $uri);
                 return $request;
-                break;
-            // case 2:
-            //     return $this->createResponse();
-            //     break;
+             case 2:
+                 return $this->createResponse();
             default:
                 return null;
-                break;
         }
-        
+
+    }
+
+    /**
+     * Create a new server request.
+     *
+     * Note that server-params are taken precisely as given - no parsing/processing
+     * of the given values is performed, and, in particular, no attempt is made to
+     * determine the HTTP method or URI, which must be provided explicitly.
+     *
+     * @param string $method The HTTP method associated with the request.
+     * @param UriInterface|string $uri The URI associated with the request. If
+     *     the value is a string, the factory MUST create a UriInterface
+     *     instance based on it.
+     * @param array $serverParams Array of SAPI parameters with which to seed
+     *     the generated request instance.
+     *
+     * @return ServerRequestInterface
+     */
+    public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
+    {
+        return new ServerRequest($method, $uri, $serverParams);
     }
 
     /**
@@ -82,27 +101,6 @@ class HttpFactory implements
 
 
     /**
-     * Create a new server request.
-     *
-     * Note that server-params are taken precisely as given - no parsing/processing
-     * of the given values is performed, and, in particular, no attempt is made to
-     * determine the HTTP method or URI, which must be provided explicitly.
-     *
-     * @param string $method The HTTP method associated with the request.
-     * @param UriInterface|string $uri The URI associated with the request. If
-     *     the value is a string, the factory MUST create a UriInterface
-     *     instance based on it.
-     * @param array $serverParams Array of SAPI parameters with which to seed
-     *     the generated request instance.
-     *
-     * @return ServerRequestInterface
-     */
-    public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
-    {
-        return new ServerRequest($method, $uri, $serverParams);
-    }
-
-    /**
      * Create a new response.
      *
      * @param int $code HTTP status code; defaults to 200
@@ -128,7 +126,7 @@ class HttpFactory implements
      */
     public function createStream(string $content = ''): StreamInterface
     {
-        return null;
+        // TODO: Implement createStream() method.
     }
 
     /**

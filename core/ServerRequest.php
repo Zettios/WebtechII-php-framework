@@ -10,7 +10,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
 
     private array $serverParams;
     private array $cookieParams;
-    private array $queryParams;
+    private array $queryParams = [];
     private array $uploadedFiles;
     private array $parsedBody;
     private array $attributes;
@@ -20,27 +20,36 @@ class ServerRequest extends Request implements ServerRequestInterface {
                                 array $serverParams)
     {
         $this->createFromGlobals();
-        
-        
-        
-        //$this->attributes = 0;
-        //parent::__construct($method, $uri, $_SERVER['SERVER_PROTOCOL'], $_SERVER, $parsedBody);
+        parent::__construct($method, $uri, $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL'], $_SERVER, $this->parsedBody);
     }
 
     private function createFromGlobals(){
-        echo 'creating from Globals';
         $this->serverParams = $_SERVER;
         $this->cookieParams = $_COOKIE;
-        //$this->queryParams = $_SERVER['QUERY_STRING'];
+        if (array_key_exists('QUERY_STRING', $_SERVER)){
+            parse_str($_SERVER['QUERY_STRING'], $this->queryParams);
+        } else {
+            $this->queryParams = [];
+        }
         $this->uploadedFiles = $_FILES;
+        $this->parsedBody = $this->getBodyFromStream();
+        $this->attributes = $_REQUEST;
+    }
+
+    private function getBodyFromStream(): array
+    {
         $rawInput = fopen('php://input', 'r');
         echo stream_get_contents($rawInput);
         $tempStream = fopen('php://temp', 'r+');
         stream_copy_to_stream($rawInput, $tempStream);
         rewind($tempStream);
-        //$this->parsedBody = ;
-        
-        echo stream_get_contents($tempStream);
+
+        parse_str(fgets($tempStream), $output);
+
+        fclose($rawInput);
+        fclose($tempStream);
+
+        return $output;
     }
 
     /**
@@ -52,7 +61,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
      *
      * @return array
      */
-    public function getServerParams()
+    public function getServerParams(): array
     {
         return $this->serverParams;
     }
@@ -67,7 +76,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
      *
      * @return array
      */
-    public function getCookieParams()
+    public function getCookieParams(): array
     {
         return $this->cookieParams;
     }
@@ -108,7 +117,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
      *
      * @return array
      */
-    public function getQueryParams()
+    public function getQueryParams(): array
     {
         return $this->queryParams;
     }

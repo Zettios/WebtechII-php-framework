@@ -18,19 +18,18 @@ class Request implements RequestInterface {
 
     public function __construct(string $method,
                                 string|UriInterface $uri,
+                                string $requestTarget,
                                 string $protocolVersion,
                                 array $headers,
-                                StreamInterface $body)
+                                array $body)
     {
         $this->method = $method;
-
         if (gettype($uri) == "string") {
-            $uri = new Uri('https', '/');
-            //$uri = new Uri::from// <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
+            $this->uri = new Uri(null, null, $_SERVER['SERVER_NAME'], $_SERVER['SERVER_PORT'], $_SERVER['REQUEST_URI'], $_SERVER['QUERY_STRING'] ?? '', '');
         } else {
             $this->uri = $uri;
         }
-
+        $this->requestTarget = $requestTarget;
         $this->setMessage($protocolVersion, $headers, $body);
     }
 
