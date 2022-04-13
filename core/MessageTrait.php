@@ -37,9 +37,9 @@ trait MessageTrait {
      */
     public function getProtocolVersion(): string
     {
-        if (!in_array($this->protocolVersion, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
-            throw new \InvalidArgumentException("Protocol version is not supported. Please set another protocol version.");
-        }
+//        if (!in_array($this->protocolVersion, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
+//            throw new \InvalidArgumentException("Protocol version is not supported. Please set another protocol version.");
+//        }
         return $this->protocolVersion;
     }
 

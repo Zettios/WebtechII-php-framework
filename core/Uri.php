@@ -109,8 +109,6 @@ class Uri implements UriInterface {
         return isset($this->host) ? $this->host : "";
     }
 
-
-
     /**
      * Retrieve the port component of the URI.
      *
@@ -129,7 +127,6 @@ class Uri implements UriInterface {
     public function getPort() {
         return $this->port;
     }
-
 
     /**
      * Retrieve the authority component of the URI.
@@ -421,7 +418,7 @@ class Uri implements UriInterface {
      * @return string
      */
     public function __toString() {
-        $uri = $this->scheme;
+        $uri = $this->getScheme().":";
         if (isset($this->host)) {
             $uri .= "//";
             if (isset($this->userInfo)) {
@@ -437,12 +434,12 @@ class Uri implements UriInterface {
 
         $uri .= $this->path;
 
-        if (isset($this->query)) {
-            $uri .= $this->query;
+        if (isset($this->query) and !empty($this->fragment)) {
+            $uri .= "?".$this->query;
         }
 
-        if (isset($this->fragment)) {
-            $uri .= $this->fragment;
+        if (isset($this->fragment) and !empty($this->fragment)) {
+            $uri .= "#".$this->fragment;
         }
 
         return $uri;
