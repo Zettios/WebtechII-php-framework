@@ -12,7 +12,7 @@ class Kernel
     public function __construct()
     {
         $this->factory = new HttpFactory();
-        $this->factory->createRequest();
+        $this->factory->makeObjects(1);
 
 
         $this->router = new Router();

@@ -7,9 +7,9 @@ use Psr\Http\Message\StreamInterface;
 class Stream implements StreamInterface {
     private $stream;
 
-    public function __construct(\http\Encoding\Stream $stream)
+    public function __construct()
     {
-
+        
     }
     /**
      * Reads all data from the stream into a string, from the beginning to end.

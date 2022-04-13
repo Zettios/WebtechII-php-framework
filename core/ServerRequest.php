@@ -15,25 +15,32 @@ class ServerRequest extends Request implements ServerRequestInterface {
     private array $parsedBody;
     private array $attributes;
 
-    public function __construct(string $protocolVersion,
-                                array $headers,
-                                StreamInterface $body,
-                                string $method,
-                                UriInterface $uri,
-                                array $serverParams,
-                                array $cookieParams,
-                                array $queryParams,
-                                array $uploadedFiles,
-                                array $parsedBody,
-                                array $attributes)
+    public function __construct(string $method,
+                                string|UriInterface $uri,
+                                array $serverParams)
     {
-        parent::__construct($protocolVersion, $headers, $body, $method, $uri);
-        $this->serverParams = $serverParams;
-        $this->cookieParams = $cookieParams;
-        $this->queryParams = $queryParams;
-        $this->uploadedFiles = $uploadedFiles;
-        $this->parsedBody = $parsedBody;
-        $this->attributes = $attributes;
+        $this->createFromGlobals();
+        
+        
+        
+        //$this->attributes = 0;
+        //parent::__construct($method, $uri, $_SERVER['SERVER_PROTOCOL'], $_SERVER, $parsedBody);
+    }
+
+    private function createFromGlobals(){
+        echo 'creating from Globals';
+        $this->serverParams = $_SERVER;
+        $this->cookieParams = $_COOKIE;
+        //$this->queryParams = $_SERVER['QUERY_STRING'];
+        $this->uploadedFiles = $_FILES;
+        $rawInput = fopen('php://input', 'r');
+        echo stream_get_contents($rawInput);
+        $tempStream = fopen('php://temp', 'r+');
+        stream_copy_to_stream($rawInput, $tempStream);
+        rewind($tempStream);
+        //$this->parsedBody = ;
+        
+        echo stream_get_contents($tempStream);
     }
 
     /**
@@ -185,6 +192,11 @@ class ServerRequest extends Request implements ServerRequestInterface {
      */
     public function getParsedBody(): null|array|object
     {
+
+        //stap 1: check if content-type is application/x-www-form-urlencoded or multipart/form-data. Yes: return $_POST superglobal
+        //stap 2: If not, check body with fopen stream thingie.
+        //stap 3: If fopen returns content, save it as an object and return. If nothing is found, return null
+
         return $this->parsedBody;
     }
 

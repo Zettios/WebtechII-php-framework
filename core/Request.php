@@ -25,7 +25,8 @@ class Request implements RequestInterface {
         $this->method = $method;
 
         if (gettype($uri) == "string") {
-            $uri = new Uri('http', '/'); // <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
+            $uri = new Uri('https', '/');
+            //$uri = new Uri::from// <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
         } else {
             $this->uri = $uri;
         }
@@ -126,7 +127,7 @@ class Request implements RequestInterface {
      */
     public function getUri(): UriInterface
     {
-        return new Uri;
+        return $this->uri;
     }
 
     /**

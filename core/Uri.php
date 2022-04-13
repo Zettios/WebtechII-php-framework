@@ -53,7 +53,6 @@ class Uri implements UriInterface {
         $this->fragment = $fragment;
     }
 
-
     /**
      * Retrieve the scheme component of the URI.
      *

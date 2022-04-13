@@ -11,7 +11,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
-use ServerRequest;
 
 class HttpFactory implements
     RequestFactoryInterface,
@@ -34,27 +33,27 @@ class HttpFactory implements
      * Neem nu rust omdat moe.
      */
 
+    private static int $REQUEST = 1;
+    private static int $RESPONSE = 2;
 
-
-
-//    public function makeObjects(): MessageInterface
-//    {
-//
-//        $server = $_SERVER;
-//        $post = $_POST;
-//        $get = $_GET;
-//
-//        if (!isset($_SERVER['HTTP_CONTENT_TYPE'])) {
-//            //string $method, $uri, array $serverParams = []
-//            $serverParams = [];
-//            foreach ($_SERVER as $parm => $value){
-//                $serverParams[$parm] = $value;
-//            }
-//
-//            $serverRequest = createServerRequest($server['REQUEST_METHOD'], $server['REQUEST_URI'], $serverParams);
-//            return $serverRequest;
-//        }
-//    }
+    public function makeObjects(int $selector): ServerRequestInterface
+    {
+        switch($selector) {
+            case 1:
+                $requestMethod = $_SERVER['REQUEST_METHOD'];
+                $uri = $_SERVER['REQUEST_URI'];
+                $request = $this->createServerRequest($requestMethod, $uri);  //Server request beter te gebruiken dan request, omdat het rijker is
+                return $request;
+                break;
+            // case 2:
+            //     return $this->createResponse();
+            //     break;
+            default:
+                return null;
+                break;
+        }
+        
+    }
 
     /**
      * Create a new request.
@@ -66,7 +65,7 @@ class HttpFactory implements
      *
      * @return RequestInterface
      */
-    public function createRequest(string $method, UriInterface|string $uri): RequestInterface
+    public function createRequest(string $method, $uri): RequestInterface
     {
         $server = $_SERVER;
         $headers = [];
@@ -100,7 +99,7 @@ class HttpFactory implements
      */
     public function createServerRequest(string $method, $uri, array $serverParams = []): ServerRequestInterface
     {
-        //return new ServerRequest(null, null, null, $method, $uri, $serverParams);
+        return new ServerRequest($method, $uri, $serverParams);
     }
 
     /**
@@ -129,7 +128,7 @@ class HttpFactory implements
      */
     public function createStream(string $content = ''): StreamInterface
     {
-        // TODO: Implement createStream() method.
+        return null;
     }
 
     /**
