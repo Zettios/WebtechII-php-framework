@@ -65,6 +65,13 @@ class Kernel
         print_r($request->getHeaders());
         echo "\n- getBodyAsArray -\n";
         print_r($request->getBodyAsArray());
+
+
+        echo "\n\n\n========= With methodes test =========\n";
+        echo "\n- withProtocolVersion 1.0 -\n";
+        $request = $request->withProtocolVersion('1.0');
+        echo $request->getProtocolVersion();
+
         echo "</pre>";
 
 

@@ -18,7 +18,8 @@ trait MessageTrait {
                                 array $headers,
                                 array $body)
     {
-        $this->protocolVersion = $protocolVersion;
+        $cleanProtocolVersion = explode("/", $protocolVersion);
+        $this->protocolVersion = $cleanProtocolVersion[1];
         foreach ($headers as $key => $value) {
             $this->headers[strtolower($key)] = [
                 "preservedCaseName" => $key,
