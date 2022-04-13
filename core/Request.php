@@ -14,6 +14,7 @@ class Request implements RequestInterface {
 
     private string $method;
     private Uri $uri;
+    private mixed $requestTarget;
 
     public function __construct(string $method,
                                 string|UriInterface $uri,
@@ -87,7 +88,7 @@ class Request implements RequestInterface {
      */
     public function getRequestTarget(): string
     {
-        return isset($this->requestTarget) ? $this->requestTarget : "/";
+        return $this->requestTarget ?? ($this->uri ? $this->uri->getPath() : "/");
     }
 
     /**
@@ -109,7 +110,9 @@ class Request implements RequestInterface {
      */
     public function withRequestTarget($requestTarget): self
     {
-        // TODO: Implement withRequestTarget() method.
+        $new = clone $this;
+        $new->requestTarget = $requestTarget;
+        return $this;
     }
 
     /**
