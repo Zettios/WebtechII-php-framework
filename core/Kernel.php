@@ -7,9 +7,14 @@ class Kernel
     public string $uri;
     private string $method;
     private Router $router;
+    private HttpFactory $factory;
 
     public function __construct()
     {
+        $this->factory = new HttpFactory();
+        $this->factory->createRequest();
+
+
         $this->router = new Router();
         $this->uri = $_SERVER['REQUEST_URI']; //Uit een request halen
         $this->method = $_SERVER['REQUEST_METHOD']; //Uit een request halen

@@ -7,64 +7,30 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-class Request extends AbstractMessage implements RequestInterface {
+class Request implements RequestInterface {
+    use MessageTrait;
+
     private const AVAILABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
 
     private string $method;
     private Uri $uri;
+    private mixed $requestTarget;
 
-    public function __construct(string $protocolVersion,  
-                                array $headers = [],
-                                StreamInterface $body,
-                                string $method,
-                                UriInterface $uri)
+    public function __construct(string $method,
+                                string|UriInterface $uri,
+                                string $protocolVersion,
+                                array $headers,
+                                StreamInterface $body)
     {
-        parent::__construct($protocolVersion, $headers, $body);
         $this->method = $method;
-        $this->uri = $uri;
-    }
 
-    /**
-     * Retrieves the message's request target.
-     *
-     * Retrieves the message's request-target either as it will appear (for
-     * clients), as it appeared at request (for servers), or as it was
-     * specified for the instance (see withRequestTarget()).
-     *
-     * In most cases, this will be the origin-form of the composed URI,
-     * unless a value was provided to the concrete implementation (see
-     * withRequestTarget() below).
-     *
-     * If no URI is available, and no request-target has been specifically
-     * provided, this method MUST return the string "/".
-     *
-     * @return string
-     */
-    public function getRequestTarget()
-    {
-        return isset($this->requestTarget) ? $this->requestTarget : "/";
-    }
+        if (gettype($uri) == "string") {
+            $uri = new Uri('http', '/'); // <-- Dit moet nog opgelost worden. Uri string moet geparsed worden als Uri object.
+        } else {
+            $this->uri = $uri;
+        }
 
-    /**
-     * Return an instance with the specific request-target.
-     *
-     * If the request needs a non-origin-form request-target — e.g., for
-     * specifying an absolute-form, authority-form, or asterisk-form —
-     * this method may be used to create an instance with the specified
-     * request-target, verbatim.
-     *
-     * This method MUST be implemented in such a way as to retain the
-     * immutability of the message, and MUST return an instance that has the
-     * changed request target.
-     *
-     * @link http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
-     *     request-target forms allowed in request messages)
-     * @param mixed $requestTarget
-     * @return static
-     */
-    public function withRequestTarget($requestTarget)
-    {
-        // TODO: Implement withRequestTarget() method.
+        $this->setMessage($protocolVersion, $headers, $body);
     }
 
     /**
@@ -92,16 +58,61 @@ class Request extends AbstractMessage implements RequestInterface {
      * @return static
      * @throws \InvalidArgumentException for invalid HTTP methods.
      */
-    public function withMethod($method)
+    public function withMethod($method): self
     {
         if (!array_key_exists($method, self::AVAILABLE_METHODS)) {
-            throw new \InvalidArgumentException("Provided method is a invalid HTTP method."); 
+            throw new \InvalidArgumentException("Provided method is a invalid HTTP method.");
         }
-        
+
         $new = clone $this;
         $new->method = $method;
 
         return $new;
+    }
+
+    /**
+     * Retrieves the message's request target.
+     *
+     * Retrieves the message's request-target either as it will appear (for
+     * clients), as it appeared at request (for servers), or as it was
+     * specified for the instance (see withRequestTarget()).
+     *
+     * In most cases, this will be the origin-form of the composed URI,
+     * unless a value was provided to the concrete implementation (see
+     * withRequestTarget() below).
+     *
+     * If no URI is available, and no request-target has been specifically
+     * provided, this method MUST return the string "/".
+     *
+     * @return string
+     */
+    public function getRequestTarget(): string
+    {
+        return $this->requestTarget ?? ($this->uri ? $this->uri->getPath() : "/");
+    }
+
+    /**
+     * Return an instance with the specific request-target.
+     *
+     * If the request needs a non-origin-form request-target — e.g., for
+     * specifying an absolute-form, authority-form, or asterisk-form —
+     * this method may be used to create an instance with the specified
+     * request-target, verbatim.
+     *
+     * This method MUST be implemented in such a way as to retain the
+     * immutability of the message, and MUST return an instance that has the
+     * changed request target.
+     *
+     * @link http://tools.ietf.org/html/rfc7230#section-5.3 (for the various
+     *     request-target forms allowed in request messages)
+     * @param mixed $requestTarget
+     * @return static
+     */
+    public function withRequestTarget($requestTarget): self
+    {
+        $new = clone $this;
+        $new->requestTarget = $requestTarget;
+        return $this;
     }
 
     /**
@@ -148,7 +159,7 @@ class Request extends AbstractMessage implements RequestInterface {
      * @param bool $preserveHost Preserve the original state of the Host header.
      * @return static
      */
-    public function withUri(UriInterface $uri, $preserveHost = false)
+    public function withUri(UriInterface $uri, $preserveHost = false): self
     {
         $new = clone $this;
         if ($preserveHost) {

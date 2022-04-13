@@ -6,16 +6,16 @@ use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
 
-abstract class AbstractMessage implements MessageInterface {
+trait MessageTrait {
 
-    private const AVAILABLE_PROTOCOL_VERSIONS = ["1.0", "1.1", "2.0"];
+    private array $AVAILABLE_PROTOCOL_VERSIONS = ["1.0", "1.1", "2.0"];
 
     private string $protocolVersion;
     private array $headers = [];
     private StreamInterface $body;
 
-    public function __construct(string $protocolVersion,
-                                array $headers = [],
+    public function setMessage(string $protocolVersion,
+                                array $headers,
                                 StreamInterface $body)
     {
         $this->protocolVersion = $protocolVersion;
@@ -53,7 +53,7 @@ abstract class AbstractMessage implements MessageInterface {
      * @param string $version HTTP protocol version
      * @return static
      */
-    public function withProtocolVersion($version): RequestInterface
+    public function withProtocolVersion($version): self
     {
         if (!in_array($version, self::AVAILABLE_PROTOCOL_VERSIONS)) {
             throw new \InvalidArgumentException("Protocol version is not supported.");
@@ -106,7 +106,7 @@ abstract class AbstractMessage implements MessageInterface {
      *     name using a case-insensitive string comparison. Returns false if
      *     no matching header name is found in the message.
      */
-    public function hasHeader($name) : bool
+    public function hasHeader($name): bool
     {
         return array_key_exists(strtolower($name), $this->headers);
     }
@@ -149,7 +149,7 @@ abstract class AbstractMessage implements MessageInterface {
      *    concatenated together using a comma. If the header does not appear in
      *    the message, this method MUST return an empty string.
      */
-    public function getHeaderLine($name)
+    public function getHeaderLine($name): string
     {
         return array_key_exists(strtolower($name), $this->headers) ? implode(", ", $this->headers[strtolower($name)]["value"]) : "";
     }
@@ -169,7 +169,7 @@ abstract class AbstractMessage implements MessageInterface {
      * @return static
      * @throws \InvalidArgumentException for invalid header names or values.
      */
-    public function withHeader($name, $value): RequestInterface
+    public function withHeader($name, $value): self
     {
         $value = gettype($value) == "array" ? $value : [$value];
         $new = clone $this;
@@ -197,7 +197,7 @@ abstract class AbstractMessage implements MessageInterface {
      * @return static
      * @throws \InvalidArgumentException for invalid header names or values.
      */
-    public function withAddedHeader($name, $value): RequestInterface
+    public function withAddedHeader($name, $value): self
     {
         $value = gettype($value) == "array" ? $value : [$value];
         $new = clone $this;
@@ -225,12 +225,12 @@ abstract class AbstractMessage implements MessageInterface {
      * @param string $name Case-insensitive header field name to remove.
      * @return static
      */
-    public function withoutHeader($name)
+    public function withoutHeader($name): self
     {
         if (!array_key_exists(strtolower($name), $this->headers)) return $this;
 
         $new = clone $this;
-        unset($new->headers[$name]);
+        unset($new->headers[strtolower($name)]);
 
         return $new;
     }
@@ -258,7 +258,7 @@ abstract class AbstractMessage implements MessageInterface {
      * @return static
      * @throws \InvalidArgumentException When the body is not valid.
      */
-    public function withBody(StreamInterface $body)
+    public function withBody(StreamInterface $body): self
     {
         if (!($body instanceof StreamInterface)) {
             throw new \InvalidArgumentException("Provided body is not a StreamInterface.");
