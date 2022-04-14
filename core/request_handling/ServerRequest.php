@@ -16,7 +16,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
 
     public function __construct(string $method,
                                 string|UriInterface $uri,
-                                array $serverParams)
+                                array $serverParams = [])
     {
         $this->createFromGlobals();
         parent::__construct($method, $uri, $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL'], $_SERVER, $this->parsedBody);

@@ -13,6 +13,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
+//TODO: YOU'RE NO LONGER NECESSARY. PREPARE FOR DELETION IN THE IMPENDING FUTURE. BITCH.
 class HttpFactory implements
     RequestFactoryInterface,
     ServerRequestFactoryInterface,
