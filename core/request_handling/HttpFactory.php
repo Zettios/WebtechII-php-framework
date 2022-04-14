@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core;
+namespace Webtek\Core\RequestHandling;
 
 use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -86,17 +86,17 @@ class HttpFactory implements
      */
     public function createRequest(string $method, $uri): RequestInterface
     {
-        $server = $_SERVER;
-        $headers = [];
-        foreach ($_SERVER as $parm => $value){
-            $headers[$parm] = $value;
-        }
-
-        return new Request( $server['REQUEST_METHOD'],
-                            $server['REQUEST_URI'],
-                            $server['SERVER_PROTOCOL'],
-                            $headers,
-                            $uri);
+//        $server = $_SERVER;
+//        $headers = [];
+//        foreach ($_SERVER as $parm => $value){
+//            $headers[$parm] = $value;
+//        }
+//
+//        return new Request( $server['REQUEST_METHOD'],
+//                            $server['REQUEST_URI'],
+//                            $server['SERVER_PROTOCOL'],
+//                            $headers,
+//                            $uri);
     }
 
 
@@ -112,7 +112,13 @@ class HttpFactory implements
      */
     public function createResponse(int $code = 200, string $reasonPhrase = ''): ResponseInterface
     {
-        return new Response('1.1', [], null, $code, $reasonPhrase);
+        $protocolCode = explode("/", $_SERVER['SERVER_PROTOCOL']);
+        $headers = [];
+        foreach ($_SERVER as $parm => $value)  {
+            $headers[$parm] = $value;
+        }
+        $body = $_POST;
+        return new Response($protocolCode[1], $code, $reasonPhrase, $headers, $body);
     }
 
     /**

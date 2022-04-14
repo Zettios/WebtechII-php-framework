@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core;
+namespace Webtek\Core\RequestHandling;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
@@ -434,11 +434,11 @@ class Uri implements UriInterface {
 
         $uri .= $this->path;
 
-        if (isset($this->query) and !empty($this->fragment)) {
+        if (isset($this->query) and !empty($this->getQuery())) {
             $uri .= "?".$this->query;
         }
 
-        if (isset($this->fragment) and !empty($this->fragment)) {
+        if (isset($this->fragment) and !empty($this->getFragment())) {
             $uri .= "#".$this->fragment;
         }
 

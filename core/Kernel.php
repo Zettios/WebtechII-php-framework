@@ -2,6 +2,10 @@
 
 namespace Webtek\Core;
 
+use Webtek\Core\RequestHandling\HttpFactory;
+use Webtek\Core\RequestHandling\ServerRequest;
+use Webtek\Core\Routing\Router;
+
 class Kernel
 {
     public string $uri;

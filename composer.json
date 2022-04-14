@@ -6,12 +6,16 @@
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "psr/http-factory": "^1.0",
-        "monolog/monolog": "^2.4"
+        "monolog/monolog": "^2.4",
+        "psr/container": "^2.0"
     },
     "autoload": {
         "psr-4": {
+            "App\\": "./src",
             "Webtek\\Core\\": "./core",
-            "App\\": "./src"
+            "Webtek\\Core\\DependencyInjection\\": "./core/dependency_injection",
+            "Webtek\\Core\\RequestHandling\\": "./core/request_handling",
+            "Webtek\\Core\\Routing\\": "./core/routing"
         }
     },
     "authors": [

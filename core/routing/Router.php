@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core;
+namespace Webtek\Core\Routing;
 
 class Router
 {

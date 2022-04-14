@@ -1,9 +1,8 @@
 <?php
 
-namespace Webtek\Core;
+namespace Webtek\Core\RequestHandling;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
 
 class Response implements ResponseInterface
 {
@@ -78,10 +77,10 @@ class Response implements ResponseInterface
     private string $reasonPhrase;
 
     public function __construct(string $protocolVersion,
-                                array $headers,
-                                StreamInterface $body,
                                 int $statusCode,
-                                string $reasonPhrase)
+                                string $reasonPhrase,
+                                array $headers,
+                                array $body)
     {
         $this->setMessage($protocolVersion, $headers, $body);
         $this->statusCode = $statusCode;

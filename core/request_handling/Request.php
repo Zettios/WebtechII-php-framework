@@ -1,10 +1,8 @@
 <?php
 
-namespace Webtek\Core;
-
+namespace Webtek\Core\RequestHandling;
 
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
 class Request implements RequestInterface {
