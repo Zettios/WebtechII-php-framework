@@ -3,6 +3,7 @@
 use Webtek\Core\DependencyInjection\DIContainer;
 use Webtek\Core\Kernel;
 use Webtek\Core\RequestHandling\ServerRequest;
+use Webtek\Core\Routing\A;
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -13,36 +14,37 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 $request = new ServerRequest($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 $di = new DIContainer();
-//$di->resolve(ServerRequest::class);
+$di->set('aClass', [A::class, 'run']);
+$service = $di->get('aClass');
 
 
-//============ TEST FOR DI CONTAINER ============
-class A {}
-class B {}
-class Test {
-    public function __construct(
-        public A $a, public B $b) {}
-}
-
-$ref = new ReflectionClass(Test::class);
-$cons = $ref->getConstructor();
-$params = [];
-foreach ($cons->getParameters() as $param) {
-    $name = $param->getName();
-    $type = $param->getType();
-    echo "Name is $name, type is $type<br>";
-    if ($type instanceof ReflectionNamedType) {
-        $cls = new ReflectionClass($type->getName());
-        $params[$name] = $cls->newInstance();
-    } else {
-        $params[$name] = null;
-    }
-}
-$test = $ref->newInstance(...$params);
-echo "<pre>";
-var_dump($test);
-echo "</pre>";
-//============ END TEST FOR DI CONTAINER ============
+////============ TEST FOR DI CONTAINER ============
+//class A {}
+//class B {}
+//class Test {
+//    public function __construct(
+//        public A $a, public B $b) {}
+//}
+//
+//$ref = new ReflectionClass(Test::class);
+//$cons = $ref->getConstructor();
+//$params = [];
+//foreach ($cons->getParameters() as $param) {
+//    $name = $param->getName();
+//    $type = $param->getType();
+//    echo "Name is $name, type is $type<br>";
+//    if ($type instanceof ReflectionNamedType) {
+//        $cls = new ReflectionClass($type->getName());
+//        $params[$name] = $cls->newInstance();
+//    } else {
+//        $params[$name] = null;
+//    }
+//}
+//$test = $ref->newInstance(...$params);
+//echo "<pre>";
+//var_dump($test);
+//echo "</pre>";
+////============ END TEST FOR DI CONTAINER ============
 
 //$this->printRequest($request);
 

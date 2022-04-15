@@ -8,6 +8,8 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
+use ReflectionNamedType;
+use Webtek\Core\Routing\C;
 
 /**
  * Het doel van een DI container is door de inversion of control toe te passen. Wat houdt dit in?
@@ -32,12 +34,44 @@ class DIContainer implements ContainerInterface
      */
     public function get(string $id)
     {
-        if (!$this->has($id)){
+        if (!$this->has($id)) {
             throw new InvalidArgumentException("Service bestaat niet");
+            //throw new ContainerExceptionInterface("Service bestaat niet");
         }
 
-        $service = $this->services[$id];
-        return $service($this);
+        $reflection = new ReflectionClass($this->services[$id][0]);
+        $params = $this->createClass($reflection);
+        echo "<pre>";
+        print_r($params);
+        echo "</pre>";
+        return $reflection->newInstance(...$params);
+    }
+
+    public function createClass(ReflectionClass $reflection): mixed
+    {
+        echo "<pre>";
+        echo "=============<br>";
+        echo ($reflection->getName());
+        echo "</pre>";
+
+        $cons = $reflection->getConstructor();
+        $params = [];
+
+        if (isset($cons)) {
+            foreach ($cons->getParameters() as $param) {
+                $name = $param->getName();
+                $type = $param->getType();
+                echo "Name: ".$name."<br>Type: ".$type."<br>";
+                if ($type instanceof ReflectionNamedType) {
+                    $reflectionClass = new ReflectionClass($type->getName());
+                    $params[$name] = $this->createClass($reflectionClass);
+                }
+            }
+        } else {
+            return $reflection->newInstance();
+        }
+
+        return $params;
     }
 
     /**
@@ -53,39 +87,9 @@ class DIContainer implements ContainerInterface
         return true;
     }
 
-    public function resolve($service)
+
+    public function set(string $id, callable $callable): void
     {
-        $reflection = new ReflectionClass($service);
-        if (!$reflection->isInstantiable()){
-            throw new Exception("Class $service is not instantiable");
-        }
-
-        $constructor = $reflection->getConstructor();
-        if (is_null($constructor)) {
-            return $reflection->newInstance();
-        }
-
-        $parameters = $constructor->getParameters();
-        $dependencies = $this->getDependencies($parameters, $reflection);
-
-
-        echo "<pre>";
-        echo $constructor;
-        echo "</pre>";
-
-        return $reflection->newInstanceArgs($dependencies);
-    }
-
-    private function getDependencies($parameters, $reflection): array
-    {
-        $dependencies = [];
-        foreach ($parameters as $parameter){
-            $dependency = $parameters->getType();
-        }
-        return [];
-    }
-
-    public function set(string $id, callable $callable): void{
         $this->services[$id] = $callable;
     }
 }
