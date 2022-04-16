@@ -1,7 +1,6 @@
 <?php
 
 use Webtek\Core\DependencyInjection\DIContainer;
-use Webtek\Core\Kernel;
 use Webtek\Core\RequestHandling\ServerRequest;
 use Webtek\Core\Routing\A;
 
@@ -14,16 +13,17 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 $request = new ServerRequest($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
 $di = new DIContainer();
-$di->set('aClass', [A::class, 'run']);
+$di->register('aClass', A::class);
 $service = $di->get('aClass');
 
 
+
 ////============ TEST FOR DI CONTAINER ============
-//class A {}
-//class B {}
+//class Ass {}
+//class Bass {}
 //class Test {
 //    public function __construct(
-//        public A $a, public B $b) {}
+//        public Ass $a, public Bass $b) {}
 //}
 //
 //$ref = new ReflectionClass(Test::class);

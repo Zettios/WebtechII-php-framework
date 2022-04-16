@@ -2,14 +2,10 @@
 
 namespace Webtek\Core\DependencyInjection;
 
-use Exception;
 use http\Exception\InvalidArgumentException;
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 use ReflectionNamedType;
-use Webtek\Core\Routing\C;
 
 /**
  * Het doel van een DI container is door de inversion of control toe te passen. Wat houdt dit in?
@@ -26,7 +22,13 @@ use Webtek\Core\Routing\C;
 
 class DIContainer implements ContainerInterface
 {
-    public array $services = [];
+    public array $registeredClasses = [];
+    public array $createdClasses = [];
+
+    public function register(string $id, string $class): void
+    {
+        $this->registeredClasses[$id] = $class;
+    }
 
     /**
      * @param string $id
@@ -39,21 +41,13 @@ class DIContainer implements ContainerInterface
             //throw new ContainerExceptionInterface("Service bestaat niet");
         }
 
-        $reflection = new ReflectionClass($this->services[$id][0]);
+        $reflection = new ReflectionClass($this->registeredClasses[$id]);
         $params = $this->createClass($reflection);
-        echo "<pre>";
-        print_r($params);
-        echo "</pre>";
         return $reflection->newInstance(...$params);
     }
 
     public function createClass(ReflectionClass $reflection): mixed
     {
-        echo "<pre>";
-        echo "=============<br>";
-        echo ($reflection->getName());
-        echo "</pre>";
-
         $cons = $reflection->getConstructor();
         $params = [];
 
@@ -61,13 +55,14 @@ class DIContainer implements ContainerInterface
             foreach ($cons->getParameters() as $param) {
                 $name = $param->getName();
                 $type = $param->getType();
-                echo "Name: ".$name."<br>Type: ".$type."<br>";
+                echo "Name: ".$name."<br>Type: ".$type."<br><br>";
                 if ($type instanceof ReflectionNamedType) {
                     $reflectionClass = new ReflectionClass($type->getName());
                     $params[$name] = $this->createClass($reflectionClass);
                 }
             }
         } else {
+            echo $reflection->getName();
             return $reflection->newInstance();
         }
 
@@ -80,16 +75,10 @@ class DIContainer implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        if (!array_key_exists($id, $this->services)){
+        if (!array_key_exists($id, $this->registeredClasses)){
             return false;
         }
 
         return true;
-    }
-
-
-    public function set(string $id, callable $callable): void
-    {
-        $this->services[$id] = $callable;
     }
 }

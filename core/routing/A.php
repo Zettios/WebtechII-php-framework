@@ -8,6 +8,11 @@ class A
     {
     }
 
+    public function wow()
+    {
+        echo 'Wow';
+    }
+
     static function run()
     {
         echo 'Pog';
