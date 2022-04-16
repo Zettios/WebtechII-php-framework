@@ -3,9 +3,13 @@
 namespace Webtek\Core\DependencyInjection;
 
 use http\Exception\InvalidArgumentException;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 use ReflectionNamedType;
+use Webtek\Core\DependencyInjection\Exception\ContainerException;
+use Webtek\Core\DependencyInjection\Exception\NotFoundException;
 
 /**
  * Het doel van een DI container is door de inversion of control toe te passen. Wat houdt dit in?
@@ -25,60 +29,114 @@ class DIContainer implements ContainerInterface
     public array $registeredClasses = [];
     public array $createdClasses = [];
 
-    public function register(string $id, string $class): void
-    {
-        $this->registeredClasses[$id] = $class;
-    }
-
     /**
-     * @param string $id
-     * @return mixed
+     * Registers the way which class to use for certain id/interface/class name in constructors.
+     *
+     * @param string $id ID, or parameter type used in constructors or methods.
+     * @param string $class Class name
+     * @param array $config Configuration of manually defined parameters
+     *
+     * @return void
      */
-    public function get(string $id)
+    public function register(string $id, string $class, array $config = []): void
     {
-        if (!$this->has($id)) {
-            throw new InvalidArgumentException("Service bestaat niet");
-            //throw new ContainerExceptionInterface("Service bestaat niet");
-        }
-
-        $reflection = new ReflectionClass($this->registeredClasses[$id]);
-        $params = $this->createClass($reflection);
-        return $reflection->newInstance(...$params);
+        $this->registeredClasses[$id] = [
+            "class" => $class,
+            "config" => $config
+        ];
     }
 
-    public function createClass(ReflectionClass $reflection): mixed
+    public function quickRegister(string $class, array $config = []): void
+    {
+        $this->registeredClasses[$class] = [
+            "class" => $class,
+            "config" => $config
+        ];
+    }
+
+    public function createClass(ReflectionClass $reflection): array
     {
         $cons = $reflection->getConstructor();
         $params = [];
 
         if (isset($cons)) {
             foreach ($cons->getParameters() as $param) {
-                $name = $param->getName();
-                $type = $param->getType();
-                echo "Name: ".$name."<br>Type: ".$type."<br><br>";
-                if ($type instanceof ReflectionNamedType) {
-                    $reflectionClass = new ReflectionClass($type->getName());
-                    $params[$name] = $this->createClass($reflectionClass);
+                $paramName = $param->getName();
+                $paramType = $param->getType();
+
+                // Check if parameter is builtin/primitive (not a class, trait or interface)
+                if ($paramType == null || $paramType->isBuiltin()) {
+                    // If it is primitive, search for configuration in register
+                    $makingClass = $reflection->getName();
+                    if (array_key_exists($paramName, $this->registeredClasses[$makingClass]["config"])) {
+                        $params[$paramName] = $this->registeredClasses[$makingClass]["config"][$paramName];
+                    } else {
+                        throw new ContainerException("Unable to resolve " . $makingClass . " because no primitive parameter configuration was given on registration while class constructor requires one.");
+                    }
+                } else if ($paramType instanceof ReflectionNamedType) {
+                    // If it is not primitive, it must be a class dependency
+                    // Check if class is registered before continuing to resolve
+                    $paramTypeName = $paramType->getName();
+
+                    if ($this->has($paramTypeName)) {
+                        // If the class is registered, check if the class is already created
+                        if (isset($this->createdClasses[$paramTypeName])) {
+                            // The class seems to have been created before, retrieve from createdClasses
+                            $params[$paramName] = $this->createdClasses[$paramTypeName];
+                        } else {
+                            // The class has NOT been created before, create a new one by resolving
+                            $params[$paramName] = $this->get($paramTypeName);
+                        }
+                    } else {
+                        throw new ContainerException("Registered class dependent on unregistered class");
+                    }
+                } else {
+                    throw new ContainerException("I don't know what the fuck you did");
                 }
             }
-        } else {
-            echo $reflection->getName();
-            return $reflection->newInstance();
         }
 
         return $params;
     }
 
     /**
-     * @param string $id
+     * Finds an entry of the container by its identifier and returns it.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @return mixed Entry.
+     */
+    public function get(string $id): object
+    {
+        if (!$this->has($id)) {
+            throw new NotFoundException("Service is not registered.");
+            //throw new ContainerExceptionInterface("Service bestaat niet");
+        }
+
+        if (isset($this->createdClasses[$id])) return $this->createdClasses[$id];
+
+        $reflection = new ReflectionClass($this->registeredClasses[$id]["class"]);
+        $params = $this->createClass($reflection);
+        $this->createdClasses[$id] = $reflection->newInstance(...$params);
+        return $this->createdClasses[$id];
+    }
+
+    /**
+     * Returns true if the container can return an entry for the given identifier.
+     * Returns false otherwise.
+     *
+     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
      * @return bool
      */
     public function has(string $id): bool
     {
-        if (!array_key_exists($id, $this->registeredClasses)){
-            return false;
-        }
-
-        return true;
+        return array_key_exists($id, $this->registeredClasses);
     }
 }
