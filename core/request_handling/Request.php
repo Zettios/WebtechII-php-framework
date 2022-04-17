@@ -23,7 +23,15 @@ class Request implements RequestInterface {
     {
         $this->method = $method;
         if (gettype($uri) == "string") {
-            $this->uri = new Uri(null, null, $_SERVER['SERVER_NAME'], $_SERVER['SERVER_PORT'], $_SERVER['PATH_INFO'] ?? "/", $_SERVER['QUERY_STRING'] ?? '', '');
+            $schema = strtolower(explode('/', $_SERVER['SERVER_PROTOCOL'])[0]);
+            $path = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?'));
+            $this->uri = new Uri($schema,
+                                 $path,
+                          null,
+                                 $_SERVER['SERVER_NAME'],
+                                 $_SERVER['SERVER_PORT'],
+                           $_SERVER['QUERY_STRING'] ?? '',
+                         '');
         } else {
             $this->uri = $uri;
         }

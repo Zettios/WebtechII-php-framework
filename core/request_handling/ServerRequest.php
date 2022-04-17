@@ -14,12 +14,10 @@ class ServerRequest extends Request implements ServerRequestInterface {
     private array $parsedBody;
     private array $attributes;
 
-    public function __construct(string $method,
-                                string|UriInterface $uri,
-                                array $serverParams = [])
+    public function __construct()
     {
         $this->createFromGlobals();
-        parent::__construct($method, $uri, $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL'], $_SERVER, $this->parsedBody);
+        parent::__construct($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL'], $_SERVER, $this->parsedBody);
     }
 
     private function createFromGlobals(){

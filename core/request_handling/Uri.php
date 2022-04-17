@@ -463,7 +463,7 @@ class Uri implements UriInterface {
 
         $uri .= $this->path;
 
-        if (isset($this->query) and !empty($this->fragment)) {
+        if (isset($this->query) and !empty($this->query)) {
             $uri .= "?".$this->query;
         }
 

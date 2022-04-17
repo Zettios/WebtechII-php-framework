@@ -15,7 +15,8 @@
             "Webtek\\Core\\": "./core",
             "Webtek\\Core\\DependencyInjection\\": "./core/dependency_injection",
             "Webtek\\Core\\RequestHandling\\": "./core/request_handling",
-            "Webtek\\Core\\Routing\\": "./core/routing"
+            "Webtek\\Core\\Routing\\": "./core/routing",
+            "Webtek\\Core\\Middleware\\": "./core/middleware"
         }
     },
     "authors": [
