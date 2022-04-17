@@ -10,16 +10,12 @@ class Kernel
 {
     private ServerRequest $request;
     private DIContainer $container;
-    private HttpFactory $factory;
 
     public function __construct()
     {
         $this->request = new ServerRequest();
-        echo $this->request->getUri()->__toString();
+        //echo $this->request->getUri()->__toString();
         $this->container = new DIContainer();
-        echo "<pre>";
-        var_dump($_SERVER);
-        echo "</pre>";
     }
 
     public function showPage()
