@@ -26,31 +26,48 @@ use Psr\Http\Message\UriInterface;
  * @link http://tools.ietf.org/html/rfc3986 (the URI specification)
  */
 class Uri implements UriInterface {
-    private const AVAILABLE_SCHEMES = ["http", "https"];
+    private const KNOWN_SCHEMES = ["http"=>80, "https"=>443, "ssh" => 21];
 
-    private ?string $scheme;
-    private string $path;
-    private ?int $port;
-    private ?string $host;
-    private ?string $userInfo;
-    private ?string $query;
-    private ?string $fragment;
-    
-    public function __construct(string $schema = null,
-                                string $userInfo = null,
-                                string $host = null,
-                                int $port = null,
-                                string $path,
-                                string $query = null,
-                                string $fragment = null)
+    public function __construct(private string $scheme,
+                                private string $path,
+                                private ?string $userInfo = null,
+                                private ?string $host = null,
+                                private ?int $port = null,
+                                private ?string $query = null,
+                                private ?string $fragment = null)
     {
-        $this->scheme = $schema;
-        $this->userInfo = $userInfo;
-        $this->host = $host;
-        $this->port = $port;
-        $this->path = $path;
-        $this->query = $query;
-        $this->fragment = $fragment;
+        if ($port === null) {
+            if (array_key_exists($scheme, self::KNOWN_SCHEMES)) {
+                $this->port = self::KNOWN_SCHEMES[$scheme];
+            } else throw new InvalidargumentException("Scheme not known and no port provided.");
+        }
+    }
+
+    public static function fromString(string $uriString): UriInterface
+    {
+        $prefix = '';
+        if (preg_match('%^(.*://\[[0-9:a-f]+\])(.*?)$%', $uriString, $matches)) {
+            /** @var array{0:string, 1:string, 2:string} $matches */
+            $prefix = $matches[1];
+            $uri = $matches[2];
+        }
+
+        $encodedUrl = preg_replace_callback(
+            '%[^:/@?&=#]+%usD',
+            static function ($matches) {
+                return urlencode($matches[0]);
+            },
+            $uriString
+        );
+
+        $result = parse_url($prefix . $encodedUrl);
+
+        if ($result === false) {
+            return false;
+        }
+
+        $uri = new self($result['scheme'], $result['path'] ?? "/", @$result['host'], @$result['port'], @$result['query'], @$result['fragment']);
+        return $uri;
     }
 
     /**
@@ -67,12 +84,9 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.1
      * @return string The URI scheme.
      */
-    public function getScheme() {
-        if ($this->scheme === null){
-            return self::AVAILABLE_SCHEMES[0];
-        } else {
-            return $this->scheme;
-        }
+    public function getScheme(): string
+    {
+        return $this->scheme;
     }
 
     /**
@@ -90,7 +104,8 @@ class Uri implements UriInterface {
      *
      * @return string The URI user information, in "username[:password]" format.
      */
-    public function getUserInfo() {
+    public function getUserInfo(): string
+    {
         return isset($this->userInfo) ? $this->userInfo : "";
     }
 
@@ -105,7 +120,8 @@ class Uri implements UriInterface {
      * @see http://tools.ietf.org/html/rfc3986#section-3.2.2
      * @return string The URI host.
      */
-    public function getHost() {
+    public function getHost(): string
+    {
         return isset($this->host) ? $this->host : "";
     }
 
@@ -124,7 +140,8 @@ class Uri implements UriInterface {
      *
      * @return null|int The URI port.
      */
-    public function getPort() {
+    public function getPort(): string
+    {
         return $this->port;
     }
 
@@ -146,7 +163,8 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.2
      * @return string The URI authority, in "[user-info@]host[:port]" format.
      */
-    public function getAuthority() {
+    public function getAuthority(): string
+    {
         $authority = "";
         if (isset($this->userInfo)) {
             $authority = $this->userInfo . "@";
@@ -186,7 +204,8 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.3
      * @return string The URI path.
      */
-    public function getPath() {
+    public function getPath(): string
+    {
         return $this->path;
     }
 
@@ -210,7 +229,8 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.4
      * @return string The URI query string.
      */
-    public function getQuery() {
+    public function getQuery(): string
+    {
         return $this->query;
     }
 
@@ -230,7 +250,8 @@ class Uri implements UriInterface {
      * @see https://tools.ietf.org/html/rfc3986#section-3.5
      * @return string The URI fragment.
      */
-    public function getFragment() {
+    public function getFragment(): string
+    {
         return $this->fragment;
     }
 
@@ -249,9 +270,10 @@ class Uri implements UriInterface {
      * @return static A new instance with the specified scheme.
      * @throws \InvalidArgumentException for invalid or unsupported schemes.
      */
-    public function withScheme($scheme) {
-        if (!array_key_exists(strtolower($scheme), self::AVAILABLE_SCHEMES)) throw new \InvalidArgumentException("Provided scheme is unsupported.");
-        
+    public function withScheme($scheme): self
+    {
+        if (!array_key_exists(strtolower($scheme), self::known_SCHEMES)) throw new \InvalidArgumentException("Provided scheme is unsupported.");
+
         $new = clone $this;
         $new->scheme = strtolower($scheme);
         return $new;
@@ -271,14 +293,15 @@ class Uri implements UriInterface {
      * @param null|string $password The password associated with $user.
      * @return static A new instance with the specified user information.
      */
-    public function withUserInfo($user, $password = null) {
+    public function withUserInfo($user, $password = null): self
+    {
         $new = clone $this;
         if ($password === null){
             $new->userInfo = $user;
         } else {
             $new->userInfo = $user . ":" . $password;
         }
-        
+
         return $new;
     }
 
@@ -294,7 +317,8 @@ class Uri implements UriInterface {
      * @return static A new instance with the specified host.
      * @throws \InvalidArgumentException for invalid hostnames.
      */
-    public function withHost($host) {
+    public function withHost($host): self
+    {
         $new = clone $this;
         $new->host = $host;
         return $new;
@@ -317,7 +341,8 @@ class Uri implements UriInterface {
      * @return static A new instance with the specified port.
      * @throws \InvalidArgumentException for invalid ports.
      */
-    public function withPort($port) {
+    public function withPort($port): self
+    {
         if ($port < 2 or $port > 65536){
             throw new InvalidArgumentException("Invalid port");
         }
@@ -348,7 +373,8 @@ class Uri implements UriInterface {
      * @return static A new instance with the specified path.
      * @throws \InvalidArgumentException for invalid paths.
      */
-    public function withPath($path) {
+    public function withPath($path): self
+    {
         $new = clone $this;
         $new->path = $path;
         return $new;
@@ -369,7 +395,8 @@ class Uri implements UriInterface {
      * @return static A new instance with the specified query string.
      * @throws \InvalidArgumentException for invalid query strings.
      */
-    public function withQuery($query) {
+    public function withQuery($query): self
+    {
         $new = clone $this;
         $new->query = $query;
         return $new;
@@ -389,7 +416,8 @@ class Uri implements UriInterface {
      * @param string $fragment The fragment to use with the new instance.
      * @return static A new instance with the specified fragment.
      */
-    public function withFragment($fragment) {
+    public function withFragment($fragment): self
+    {
         $new = clone $this;
         $this->fragment = $fragment;
     }
@@ -417,8 +445,9 @@ class Uri implements UriInterface {
      * @see http://tools.ietf.org/html/rfc3986#section-4.1
      * @return string
      */
-    public function __toString() {
-        $uri = $this->getScheme().":";
+    public function __toString(): string
+    {
+        $uri = $this->scheme . ":";
         if (isset($this->host)) {
             $uri .= "//";
             if (isset($this->userInfo)) {
@@ -427,18 +456,18 @@ class Uri implements UriInterface {
 
             $uri .= $this->host;
 
-            if (isset($this->port)) {
+            if (isset($this->port) && !(array_key_exists($this->scheme, self::KNOWN_SCHEMES) && self::KNOWN_SCHEMES[$this->scheme] === $this->port)) {
                 $uri .= ":" . $this->port;
             }
         }
 
         $uri .= $this->path;
 
-        if (isset($this->query) and !empty($this->getQuery())) {
+        if (isset($this->query) and !empty($this->fragment)) {
             $uri .= "?".$this->query;
         }
 
-        if (isset($this->fragment) and !empty($this->getFragment())) {
+        if (isset($this->fragment) and !empty($this->fragment)) {
             $uri .= "#".$this->fragment;
         }
 
