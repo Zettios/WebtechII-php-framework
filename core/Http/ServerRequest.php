@@ -29,7 +29,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
         // Uri creation and gathering general request target information
         $schema = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "https" : "http";
         $requestTarget = $_SERVER["REQUEST_URI"];
-        $path = strtok($_SERVER["PHP_SELF"], "?");
+        $path = strtok($requestTarget, "?");
         $queryString = $_SERVER["QUERY_STRING"];
         $host = strtok($_SERVER["HTTP_HOST"], ":");
         $port = $_SERVER["SERVER_PORT"];
