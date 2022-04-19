@@ -31,9 +31,10 @@ class ServerRequest extends Request implements ServerRequestInterface {
         $requestTarget = $_SERVER["REQUEST_URI"];
         $path = strtok($_SERVER["PHP_SELF"], "?");
         $queryString = $_SERVER["QUERY_STRING"];
-        $host = $_SERVER["HTTP_HOST"];
+        $host = strtok($_SERVER["HTTP_HOST"], ":");
+        $port = $_SERVER["SERVER_PORT"];
 
-        $uri = new Uri($schema, $path, host: $host, query: $queryString);
+        $uri = new Uri($schema, $path, host: $host, port: $port, query: $queryString);
 
         // Getting the request method
         $method = $_SERVER["REQUEST_METHOD"];
