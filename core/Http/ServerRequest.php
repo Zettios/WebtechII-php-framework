@@ -1,52 +1,50 @@
 <?php
 
-namespace Webtek\Core\RequestHandling;
+namespace Webtek\Core\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
 class ServerRequest extends Request implements ServerRequestInterface {
 
-    private array $serverParams;
-    private array $cookieParams;
-    private array $queryParams = [];
-    private array $uploadedFiles;
-    private array $parsedBody;
-    private array $attributes;
-
-    public function __construct()
+    public function __construct(string $method,
+                                UriInterface|string $uri,
+                                string $protocolVersion,
+                                array $headers,
+                                StreamInterface $body = null,
+                                mixed $requestTarget = null,
+                                private array $serverParams = [],
+                                private array $cookieParams = [],
+                                private array $queryParams = [],
+                                private array $uploadedFiles = [],
+                                private array $parsedBody = [],
+                                private $attributes = [])
     {
-        $this->createFromGlobals();
-        parent::__construct($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI'], $_SERVER['REQUEST_URI'], $_SERVER['SERVER_PROTOCOL'], $_SERVER, $this->parsedBody);
+        parent::__construct($method, $uri, $protocolVersion, $headers, $body, $requestTarget);
     }
 
-    private function createFromGlobals(){
-        $this->serverParams = $_SERVER;
-        $this->cookieParams = $_COOKIE;
-        if (array_key_exists('QUERY_STRING', $_SERVER)){
-            parse_str($_SERVER['QUERY_STRING'], $this->queryParams);
-        } else {
-            $this->queryParams = [];
-        }
-        $this->uploadedFiles = $_FILES;
-        $this->parsedBody = $this->getBodyFromStream();
-        $this->attributes = $_REQUEST;
-    }
-
-    private function getBodyFromStream(): array
+    public static function createFromGlobals(): self
     {
-        $rawInput = fopen('php://input', 'r');
-        echo stream_get_contents($rawInput);
-        $tempStream = fopen('php://temp', 'r+');
-        stream_copy_to_stream($rawInput, $tempStream);
-        rewind($tempStream);
+        // Uri creation and gathering general request target information
+        $schema = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "https" : "http";
+        $requestTarget = $_SERVER["REQUEST_URI"];
+        $path = strtok($_SERVER["PHP_SELF"], "?");
+        $queryString = $_SERVER["QUERY_STRING"];
+        $host = $_SERVER["HTTP_HOST"];
 
-        parse_str(fgets($tempStream), $output);
+        $uri = new Uri($schema, $path, host: $host, query: $queryString);
 
-        fclose($rawInput);
-        fclose($tempStream);
+        // Getting the request method
+        $method = $_SERVER["REQUEST_METHOD"];
 
-        return $output;
+        // Getting the server protocol
+        $protocolVersion = $_SERVER["SERVER_PROTOCOL"];
+        $headers = getallheaders();
+
+        // Leaving the body null for now
+        $body = null;
+        return new self($method, $uri, $protocolVersion, $headers, $body, $requestTarget, $_SERVER, $_COOKIE, $_GET, $_FILES, $_POST);
     }
 
     /**

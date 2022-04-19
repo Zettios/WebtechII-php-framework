@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core\RequestHandling;
+namespace Webtek\Core\Http;
 
 use Psr\Http\Message\StreamInterface;
 
@@ -10,20 +10,16 @@ trait MessageTrait {
 
     private string $protocolVersion;
     private array $headers = [];
-    private array $body;
+    private ?StreamInterface $body;
 
     public function setMessage(string $protocolVersion,
                                 array $headers,
-                                array $body)
+                                ?StreamInterface $body)
     {
-        $cleanProtocolVersion = explode("/", $protocolVersion);
-        $this->protocolVersion = $cleanProtocolVersion[1];
-        foreach ($headers as $key => $value) {
-            $this->headers[strtolower($key)] = [
-                "preservedCaseName" => $key,
-                "value" => $value
-            ];
-        }
+        $this->setProtocolVersion($protocolVersion);
+
+        $this->setHeaders($headers);
+
         $this->body = $body;
     }
 
@@ -36,9 +32,6 @@ trait MessageTrait {
      */
     public function getProtocolVersion(): string
     {
-//        if (!in_array($this->protocolVersion, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
-//            throw new \InvalidArgumentException("Protocol version is not supported. Please set another protocol version.");
-//        }
         return $this->protocolVersion;
     }
 
@@ -63,6 +56,22 @@ trait MessageTrait {
         $new = clone $this;
         $new->protocolVersion = $version;
         return $new;
+    }
+
+    /**
+     * Sets protocol version, only available in private context (for construction)
+     */
+    private function setProtocolVersion(string $version): void
+    {
+        if (str_contains($version, "/")) {
+            $version = explode("/", $version)[1];
+        }
+
+        if (!in_array($version, $this->AVAILABLE_PROTOCOL_VERSIONS)) {
+            throw new \InvalidArgumentException("Protocol version is not supported.");
+        }
+
+        $this->protocolVersion = $version;
     }
 
     /**
@@ -98,6 +107,19 @@ trait MessageTrait {
         }
 
         return $preservedCaseHeaders;
+    }
+
+    /**
+     * Sets headers for private context constructor.
+     */
+    public function setHeaders(array $headers): void
+    {
+        foreach ($headers as $key => $value) {
+            $this->headers[strtolower($key)] = [
+                "preservedCaseName" => $key,
+                "value" => $value
+            ];
+        }
     }
 
     /**

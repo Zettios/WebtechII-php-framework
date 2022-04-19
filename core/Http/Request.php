@@ -1,8 +1,10 @@
 <?php
 
-namespace Webtek\Core\RequestHandling;
+namespace Webtek\Core\Http;
 
+use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
 class Request implements RequestInterface {
@@ -15,28 +17,19 @@ class Request implements RequestInterface {
     private mixed $requestTarget;
 
     public function __construct(string $method,
-                                string|UriInterface $uri,
-                                string $requestTarget,
+                                UriInterface|string $uri,
                                 string $protocolVersion,
                                 array $headers,
-                                array $body)
+                                StreamInterface $body = null,
+                                mixed $requestTarget = null)
     {
-        $this->method = $method;
-        if (gettype($uri) == "string") {
-            $schema = strtolower(explode('/', $_SERVER['SERVER_PROTOCOL'])[0]);
-            $path = substr($_SERVER['REQUEST_URI'], 0, strpos($_SERVER['REQUEST_URI'], '?'));
-            $this->uri = new Uri($schema,
-                                 $path,
-                          null,
-                                 $_SERVER['SERVER_NAME'],
-                                 $_SERVER['SERVER_PORT'],
-                           $_SERVER['QUERY_STRING'] ?? '',
-                         '');
-        } else {
-            $this->uri = $uri;
-        }
-        $this->requestTarget = $requestTarget;
+        $this->setMethod($method);
+
+        $this->setUri($uri);
+
         $this->setMessage($protocolVersion, $headers, $body);
+
+        $this->setRequestTarget($requestTarget);
     }
 
     /**
@@ -76,6 +69,14 @@ class Request implements RequestInterface {
         return $new;
     }
 
+    private function setMethod(string $method): void
+    {
+        if (!in_array($method, self::AVAILABLE_METHODS)) {
+            throw new InvalidArgumentException("No method named " . $method);
+        }
+        $this->method = $method;
+    }
+
     /**
      * Retrieves the message's request target.
      *
@@ -94,7 +95,11 @@ class Request implements RequestInterface {
      */
     public function getRequestTarget(): string
     {
-        return $this->requestTarget ?? ($this->uri ? $this->uri->getPath() : "/");
+        if (isset($this->requestTarget)) return $this->requestTarget;
+
+        if (isset($this->uri)) return $this->uri->getPath() . ($this->uri->getQuery() ?? "");
+
+        return "/";
     }
 
     /**
@@ -119,6 +124,11 @@ class Request implements RequestInterface {
         $new = clone $this;
         $new->requestTarget = $requestTarget;
         return $this;
+    }
+
+    private function setRequestTarget(mixed $requestTarget): void
+    {
+        $this->requestTarget = $requestTarget;
     }
 
     /**
@@ -176,5 +186,13 @@ class Request implements RequestInterface {
             }
         }
         return $new;
+    }
+
+    public function setUri(string|UriInterface $uri): void
+    {
+        if (gettype($uri) == "string") {
+            $uri = Uri::fromString($uri);
+        }
+        $this->uri = $uri;
     }
 }

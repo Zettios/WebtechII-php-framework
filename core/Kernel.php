@@ -2,20 +2,20 @@
 
 namespace Webtek\Core;
 
-use Webtek\Core\DependencyInjection\DIContainer;
+use Webtek\Core\DependencyInjection\Container;
 use Webtek\Core\RequestHandling\HttpFactory;
 use Webtek\Core\RequestHandling\ServerRequest;
 
 class Kernel
 {
     private ServerRequest $request;
-    private DIContainer $container;
+    private Container $container;
 
     public function __construct()
     {
         $this->request = new ServerRequest();
         //echo $this->request->getUri()->__toString();
-        $this->container = new DIContainer();
+        $this->container = new Container();
     }
 
     public function showPage()

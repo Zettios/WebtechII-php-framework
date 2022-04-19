@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core\RequestHandling;
+namespace Webtek\Core\Http;
 
 use InvalidArgumentException;
 use Psr\Http\Message\UriInterface;
@@ -45,29 +45,11 @@ class Uri implements UriInterface {
 
     public static function fromString(string $uriString): UriInterface
     {
-        $prefix = '';
-        if (preg_match('%^(.*://\[[0-9:a-f]+\])(.*?)$%', $uriString, $matches)) {
-            /** @var array{0:string, 1:string, 2:string} $matches */
-            $prefix = $matches[1];
-            $uri = $matches[2];
+        if (!$result = parse_url($uriString)) {
+            throw new InvalidArgumentException("Unable to parse Uri, wrong format.");
         }
 
-        $encodedUrl = preg_replace_callback(
-            '%[^:/@?&=#]+%usD',
-            static function ($matches) {
-                return urlencode($matches[0]);
-            },
-            $uriString
-        );
-
-        $result = parse_url($prefix . $encodedUrl);
-
-        if ($result === false) {
-            return false;
-        }
-
-        $uri = new self($result['scheme'], $result['path'] ?? "/", @$result['host'], @$result['port'], @$result['query'], @$result['fragment']);
-        return $uri;
+        return new self($result['scheme'], $result['path'] ?? "/", @$result['host'], @$result['port'], @$result['query'], @$result['fragment']);
     }
 
     /**
@@ -106,7 +88,7 @@ class Uri implements UriInterface {
      */
     public function getUserInfo(): string
     {
-        return isset($this->userInfo) ? $this->userInfo : "";
+        return $this->userInfo ?? "";
     }
 
     /**
@@ -122,7 +104,7 @@ class Uri implements UriInterface {
      */
     public function getHost(): string
     {
-        return isset($this->host) ? $this->host : "";
+        return $this->host ?? "";
     }
 
     /**
@@ -140,7 +122,7 @@ class Uri implements UriInterface {
      *
      * @return null|int The URI port.
      */
-    public function getPort(): string
+    public function getPort(): ?int
     {
         return $this->port;
     }
@@ -268,12 +250,10 @@ class Uri implements UriInterface {
      *
      * @param string $scheme The scheme to use with the new instance.
      * @return static A new instance with the specified scheme.
-     * @throws \InvalidArgumentException for invalid or unsupported schemes.
+     * @throws InvalidArgumentException for invalid or unsupported schemes.
      */
     public function withScheme($scheme): self
     {
-        if (!array_key_exists(strtolower($scheme), self::known_SCHEMES)) throw new \InvalidArgumentException("Provided scheme is unsupported.");
-
         $new = clone $this;
         $new->scheme = strtolower($scheme);
         return $new;
@@ -420,6 +400,8 @@ class Uri implements UriInterface {
     {
         $new = clone $this;
         $this->fragment = $fragment;
+
+        return $new;
     }
 
     /**

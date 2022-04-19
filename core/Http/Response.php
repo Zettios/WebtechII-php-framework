@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Core\RequestHandling;
+namespace Webtek\Core\Http;
 
 use Psr\Http\Message\ResponseInterface;
 
@@ -82,9 +82,7 @@ class Response implements ResponseInterface
                                 array $headers,
                                 array $body)
     {
-        $this->setMessage($protocolVersion, $headers, $body);
-        $this->statusCode = $statusCode;
-        $this->reasonPhrase = $reasonPhrase;
+
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace Webtek\Core\DependencyInjection;
 
-use http\Exception\InvalidArgumentException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -11,50 +10,36 @@ use ReflectionNamedType;
 use Webtek\Core\DependencyInjection\Exception\ContainerException;
 use Webtek\Core\DependencyInjection\Exception\NotFoundException;
 
-/**
- * Het doel van een DI container is door de inversion of control toe te passen. Wat houdt dit in?
- * Normaal maak je een klasse aan en daarin nog een klasse. En misschien daarin nog een klasse.
- * Met inversion of control gaat dit anders om. De DI container maakt eerst de klasse aan die een andere klass nodig heeft
- * met reflection.
- * Voorbeeld: Klasse A maakt klasse B aan. En klasse B maakt klasse C en D aan. Dit is hoe het bijvoorbeeld bij java gaat.
- * Voorbeeld inversion of control: Met reflection word er eerst gekeken welke klasse parameter klass A nodig heeft.
- *                                 Daarna word gekeken wat klasse B nodig heeft. Klasse B heeft klasse C en D nodig.
- *                                 Klasse C en D worden aangemaakt. Daarna klasse B en krijgt klasse C en D als parameters mee.
- *                                 Dan word klasse A gemaakt met klasse B als parameter.
- */
 
-
-class DIContainer implements ContainerInterface
+class Container implements ContainerInterface
 {
     public array $registeredClasses = [];
     public array $createdClasses = [];
 
     /**
-     * Registers the way which class to use for certain id/interface/class name in constructors.
+     * Registers which class to use for certain classfqcn/interface/class name in constructors.
      *
      * @param string $id ID, or parameter type used in constructors or methods.
-     * @param string $class Class name
-     * @param array $config Configuration of manually defined parameters
+     * @param string $class
+     * @param bool $singleton Controls whether or not to return a singleton
+     * @param array $staticParameters Configuration of manually defined parameters
      *
      * @return void
      */
-    public function register(string $id, string $class, array $config = []): void
+    public function set(string $id, string $class = null, array $staticParameters = []): void
     {
+        if ($class === null) {
+            $class = $id;
+        }
+
         $this->registeredClasses[$id] = [
             "class" => $class,
-            "config" => $config
+            "staticParameters" => $staticParameters
         ];
     }
 
-    public function quickRegister(string $class, array $config = []): void
-    {
-        $this->registeredClasses[$class] = [
-            "class" => $class,
-            "config" => $config
-        ];
-    }
 
-    public function createClass(ReflectionClass $reflection): array
+    public function resolve(ReflectionClass $reflection): array
     {
         $cons = $reflection->getConstructor();
         $params = [];
@@ -113,15 +98,15 @@ class DIContainer implements ContainerInterface
     {
         if (!$this->has($id)) {
             throw new NotFoundException("Service is not registered.");
-            //throw new ContainerExceptionInterface("Service bestaat niet");
         }
 
         if (isset($this->createdClasses[$id])) return $this->createdClasses[$id];
 
         $reflection = new ReflectionClass($this->registeredClasses[$id]["class"]);
-        $params = $this->createClass($reflection);
-        $this->createdClasses[$id] = $reflection->newInstance(...$params);
-        return $this->createdClasses[$id];
+        $params = $this->resolve($reflection);
+        $nClass = $reflection->newInstance(...$params);
+        $this->createdClasses[$id] = $nClass;
+        return $nClass;
     }
 
     /**
