@@ -28,7 +28,7 @@ class RequestHandler implements RequestHandlerInterface
     {
         // If nothing is on the stack anymore, report 404 not found
         if (count($this->stack) === 0) {
-            return new Response("1.1", 404);
+            return new Response("1.1", 404, textBody: "<h1>404 not found</h1>");
         }
 
         // Select the next first middleware from the stack

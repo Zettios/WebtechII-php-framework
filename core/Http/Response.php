@@ -73,17 +73,16 @@ class Response implements ResponseInterface
         511 => 'Network Authentication Required',                             // RFC6585
     ];
 
-    private int $statusCode;
     private string $reasonPhrase;
 
     public function __construct(string $protocolVersion,
-                                int $statusCode,
+                                private int $statusCode,
                                 array $headers = [],
-                                StreamInterface $body = null)
+                                StreamInterface $body = null,
+                                private ?string $textBody = null)
     {
         $this->setMessage($protocolVersion, $headers, $body);
 
-        $this->statusCode = $statusCode;
         $this->reasonPhrase = self::STATUS_REASONS[$statusCode];
     }
 
@@ -122,7 +121,7 @@ class Response implements ResponseInterface
      */
     public function withStatus($code, $reasonPhrase = ''): self
     {
-        if (!array_key_exists($code, $this->statusTexts)) {
+        if (!array_key_exists($code, self::STATUS_REASONS)) {
             throw new \InvalidArgumentException("Result code doesn't exists.");
         }
 
@@ -149,5 +148,17 @@ class Response implements ResponseInterface
     public function getReasonPhrase(): string
     {
         return $this->reasonPhrase;
+    }
+
+    public function withTextBody(string $body): self
+    {
+        $new = clone $this;
+        $new->textBody = $body;
+        return $new;
+    }
+
+    public function getTextBody(): string
+    {
+        return $this->textBody;
     }
 }

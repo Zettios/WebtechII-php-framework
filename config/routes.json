@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "source": "../controllers"
+    },
+    {
+      "path": "/admin",
+      "source": "../controllers/admin"
+    }
+  ]
+}

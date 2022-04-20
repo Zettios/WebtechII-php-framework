@@ -2,36 +2,44 @@
 
 namespace Webtek\Core;
 
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Webtek\Core\DependencyInjection\Container;
-use Webtek\Core\RequestHandling\HttpFactory;
-use Webtek\Core\RequestHandling\ServerRequest;
+use Webtek\Core\Http\Response;
+use Webtek\Core\Http\ServerRequest;
+use Webtek\Core\Middleware\RequestHandler;
+use Webtek\Core\Routing\Router;
 
 class Kernel
 {
-    private ServerRequest $request;
-    private Container $container;
-
     public function __construct()
     {
-        $this->request = new ServerRequest();
-        //echo $this->request->getUri()->__toString();
-        $this->container = new Container();
+        // Initializing HTTP server request message from globals
+        $request = ServerRequest::createFromGlobals();
+
+        // Setting up container
+        $di = new Container();
+        $di->set(RequestHandler::class);
+        $di->set(Router::class);
+        $di->set(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
+
+        // Adding middleware to the request handler
+        $di->get(RequestHandler::class)->add($di->get(Router::class));
+
+        // Execute request handler
+
+        $res = $di->get(RequestHandler::class)->handle($request);
+        $this->writeToOutput($res);
     }
 
-    public function showPage()
-    {
-        $routes = json_decode(file_get_contents('../core/routes.json'), true);
+    private function writeToOutput(Response $res) {
 
-        if (array_key_exists($this->uri, $routes[$this->method])){
-            $file = ($routes[$this->method][$this->uri]);
-            include_once "../views/".$file.".html";
-        } else {
-            echo '404 not found';
+        foreach (array_keys($res->getHeaders()) as $header) {
+            header($res->getHeaderLine($header));
         }
-    }
 
-    public function execute()
-    {
-        $this->showPage();
+        http_response_code($res->getStatusCode());
+
+        echo $res->getTextBody();
     }
 }

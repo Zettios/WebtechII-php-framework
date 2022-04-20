@@ -37,8 +37,7 @@ class Container implements ContainerInterface
         ];
     }
 
-
-    public function resolve(ReflectionClass $reflection): array
+    public function resolve(ReflectionClass $reflection, array $staticParameters = []): array
     {
         $cons = $reflection->getConstructor();
         $params = [];
@@ -52,10 +51,10 @@ class Container implements ContainerInterface
                 if ($paramType == null || $paramType->isBuiltin()) {
                     // If it is primitive, search for configuration in register
                     $makingClass = $reflection->getName();
-                    if (array_key_exists($paramName, $this->registeredClasses[$makingClass]["config"])) {
-                        $params[$paramName] = $this->registeredClasses[$makingClass]["config"][$paramName];
-                    } else {
-                        throw new ContainerException("Unable to resolve " . $makingClass . " because no primitive parameter configuration was given on registration while class constructor requires one.");
+                    if (array_key_exists($paramName, $staticParameters)) {
+                        $params[$paramName] = $staticParameters[$paramName];
+                    } elseif (!$param->isOptional()) {
+                        throw new ContainerException("Unable to resolve " . $makingClass . " because no primitive parameter configuration was given for " . $paramName);
                     }
                 } else if ($paramType instanceof ReflectionNamedType) {
                     // If it is not primitive, it must be a class dependency
@@ -71,7 +70,7 @@ class Container implements ContainerInterface
                             // The class has NOT been created before, create a new one by resolving
                             $params[$paramName] = $this->get($paramTypeName);
                         }
-                    } else {
+                    } elseif (!$param->isOptional()) {
                         throw new ContainerException("Registered class dependent on unregistered class");
                     }
                 } else {
@@ -102,7 +101,7 @@ class Container implements ContainerInterface
         if (isset($this->createdClasses[$id])) return $this->createdClasses[$id];
 
         $reflection = new ReflectionClass($this->registeredClasses[$id]["class"]);
-        $params = $this->resolve($reflection);
+        $params = $this->resolve($reflection, $this->registeredClasses[$id]["staticParameters"]);
         $nClass = $reflection->newInstance(...$params);
         $this->createdClasses[$id] = $nClass;
         return $nClass;

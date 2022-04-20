@@ -30,7 +30,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
         $schema = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "https" : "http";
         $requestTarget = $_SERVER["REQUEST_URI"];
         $path = strtok($requestTarget, "?");
-        $queryString = $_SERVER["QUERY_STRING"];
+        $queryString = strtok("?");
         $host = strtok($_SERVER["HTTP_HOST"], ":");
         $port = $_SERVER["SERVER_PORT"];
 
@@ -142,7 +142,9 @@ class ServerRequest extends Request implements ServerRequestInterface {
      */
     public function withQueryParams(array $query): self
     {
-        // TODO: Implement withQueryParams() method.
+        $new = clone $this;
+        $new->queryParams = $query;
+        return $new;
     }
 
     /**
