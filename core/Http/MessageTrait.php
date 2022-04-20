@@ -9,11 +9,11 @@ trait MessageTrait {
     private array $AVAILABLE_PROTOCOL_VERSIONS = ["1.0", "1.1", "2.0"];
 
     private string $protocolVersion;
-    private array $headers = [];
+    private array $headers;
     private ?StreamInterface $body;
 
     public function setMessage(string $protocolVersion,
-                                array $headers,
+                                array $headers = [],
                                 ?StreamInterface $body)
     {
         $this->setProtocolVersion($protocolVersion);

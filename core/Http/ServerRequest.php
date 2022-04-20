@@ -11,7 +11,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
     public function __construct(string $method,
                                 UriInterface|string $uri,
                                 string $protocolVersion,
-                                array $headers,
+                                array $headers = [],
                                 StreamInterface $body = null,
                                 mixed $requestTarget = null,
                                 private array $serverParams = [],
@@ -94,7 +94,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
      * @param array $cookies Array of key/value pairs representing cookies.
      * @return static
      */
-    public function withCookieParams(array $cookies)
+    public function withCookieParams(array $cookies): self
     {
         $new = clone $this;
         $new->cookieParams = array_merge($new->cookieParams, $cookies);
@@ -317,6 +317,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
         if (array_key_exists($name, $this->attributes)) {
             $new = clone $this;
             unset($new->attributes[$name]);
+            return $new;
         }
         return $this;
     }

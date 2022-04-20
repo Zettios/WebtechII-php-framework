@@ -20,8 +20,7 @@ class Container implements ContainerInterface
      * Registers which class to use for certain classfqcn/interface/class name in constructors.
      *
      * @param string $id ID, or parameter type used in constructors or methods.
-     * @param string $class
-     * @param bool $singleton Controls whether or not to return a singleton
+     * @param ?string $class The actual class that the id wants to fetch whenever resolving
      * @param array $staticParameters Configuration of manually defined parameters
      *
      * @return void

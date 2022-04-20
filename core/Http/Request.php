@@ -19,7 +19,7 @@ class Request implements RequestInterface {
     public function __construct(string $method,
                                 UriInterface|string $uri,
                                 string $protocolVersion,
-                                array $headers,
+                                array $headers = [],
                                 StreamInterface $body = null,
                                 mixed $requestTarget = null)
     {

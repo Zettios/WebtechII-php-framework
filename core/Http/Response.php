@@ -8,7 +8,7 @@ class Response implements ResponseInterface
 {
     use MessageTrait;
 
-    private array $statusTexts = [
+    private const STATUS_REASONS = [
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',            // RFC2518
@@ -78,11 +78,13 @@ class Response implements ResponseInterface
 
     public function __construct(string $protocolVersion,
                                 int $statusCode,
-                                string $reasonPhrase,
-                                array $headers,
-                                array $body)
+                                array $headers = [],
+                                StreamInterface $body = null)
     {
+        $this->setMessage($protocolVersion, $headers, $body);
 
+        $this->statusCode = $statusCode;
+        $this->reasonPhrase = self::STATUS_REASONS[$statusCode];
     }
 
     /**
