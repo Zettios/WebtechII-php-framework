@@ -13,7 +13,7 @@ class RequestHandler implements RequestHandlerInterface
     private array $stack = [];
 
     public function add(MiddlewareInterface $requestHandler) {
-        $stack[] = $requestHandler;
+        $this->stack[] = $requestHandler;
     }
 
     /**
@@ -34,6 +34,6 @@ class RequestHandler implements RequestHandlerInterface
         // Select the next first middleware from the stack
         $handler = array_shift($this->stack);
         // Let it be processed by the middleware
-        return $handler->process($request);
+        return $handler->process($request, $this);
     }
 }
