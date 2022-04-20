@@ -25,7 +25,7 @@ class Router implements MiddlewareInterface
         $path = $request->getUri()->getPath();
         $method = $request->getMethod();
 
-        if (!$routes = file_get_contents(dirname(__DIR__, 2) . "/config/RouteConfig.json")) {
+        if (!$routes = file_get_contents("../config/RouteConfig.json")) {
             $this->logger->error("RouteConfig.json not found in folder config.");
         }
 

@@ -32,7 +32,7 @@ class ServerRequest extends Request implements ServerRequestInterface {
         $path = strtok($requestTarget, "?");
         $queryString = strtok("?");
         $host = strtok($_SERVER["HTTP_HOST"], ":");
-        $port = $_SERVER["SERVER_PORT"];
+        $port = intval(strtok(":"));
 
         $uri = new Uri($schema, $path, host: $host, port: $port, query: $queryString);
 

@@ -2,11 +2,11 @@
   "routes": [
     {
       "path": "/",
-      "source": "../controllers"
+      "source": "../src/Controller/"
     },
     {
       "path": "/admin",
-      "source": "../controllers/admin"
+      "source": "../src/Controller/admin"
     }
   ]
 }
