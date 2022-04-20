@@ -2,6 +2,7 @@
 
 namespace Webtek\Core;
 
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Webtek\Core\DependencyInjection\Container;
@@ -22,6 +23,7 @@ class Kernel
         $di->set(RequestHandler::class);
         $di->set(Router::class);
         $di->set(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
+        $di->get(LoggerInterface::class)->pushHandler(new StreamHandler("php://stdout"));
 
         // Adding middleware to the request handler
         $di->get(RequestHandler::class)->add($di->get(Router::class));
