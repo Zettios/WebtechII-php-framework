@@ -19,6 +19,6 @@ class FallbackRequestHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $this->notFoundMiddleware->process($request);
+        return $this->notFoundMiddleware->process($request, $this);
     }
 }

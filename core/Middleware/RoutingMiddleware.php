@@ -24,10 +24,11 @@ class RoutingMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Check if url route exists in router
-
-        $this->router->resolve($request, $this->router->getContainer()->registeredControllers);
-
-        return new Response('1.1', 418, textBody: "yeet");
-        $handler->handle($request);
+        $responseText = $this->router->resolve($request);
+        if (!is_null($responseText)) {
+            return new Response('1.1', 200, textBody: $responseText);
+        } else {
+            return $handler->handle($request);
+        }
     }
 }

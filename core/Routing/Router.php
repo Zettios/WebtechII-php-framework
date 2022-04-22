@@ -19,11 +19,6 @@ class Router
         $this->container = $container;
     }
 
-    public function getContainer(): ContainerInterface
-    {
-        return $this->container;
-    }
-
     public function getRoute(array $controllers)
     {
         foreach ($controllers as $controller){
@@ -46,7 +41,7 @@ class Router
         return $this;
     }
 
-    public function getView(Request $request): string
+    public function getView(Request $request): ?string
     {
         $uri = $request->getUri()->getPath();
         $requestMethod = $request->getMethod();
@@ -58,17 +53,18 @@ class Router
                 if (array_key_exists($uri, $this->routes[$requestMethod])) {
                     return call_user_func($this->routes[$requestMethod][$uri]);
                 } else {
-                    return "";
+                    return null;
                 }
             } else {
-                return "";
+                return null;
             }
         }
     }
 
-    public function resolve(Request $request, array $controllers) {
+    public function resolve(Request $request) {
+        $controllers = $this->container->registeredControllers;
         $this->getRoute($controllers);
         $response = $this->getView($request);
-        echo $response;
+        return $response;
     }
 }
