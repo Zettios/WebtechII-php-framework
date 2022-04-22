@@ -45,7 +45,8 @@ class Uri implements UriInterface {
 
     public static function fromString(string $uriString): UriInterface
     {
-        if (!$result = parse_url($uriString)) {
+        $result = parse_url($uriString);
+        if (!$result || !isset($result['scheme']) || !isset($result['path'])) {
             throw new InvalidArgumentException("Unable to parse Uri, wrong format.");
         }
 
