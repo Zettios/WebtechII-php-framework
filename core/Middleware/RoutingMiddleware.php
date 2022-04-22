@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Webtek\Core\Http\Response;
 use Webtek\Core\Routing\Router;
 
 class RoutingMiddleware implements MiddlewareInterface
@@ -23,6 +24,7 @@ class RoutingMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         // Check if url route exists in router
+        return new Response('1.1', 418, textBody: "yeet");
         $handler->handle($request);
     }
 }

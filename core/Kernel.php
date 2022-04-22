@@ -19,6 +19,7 @@ use Webtek\Core\Routing\Router;
 
 class Kernel
 {
+    private array $middlewares;
     private Container $container;
 
     public function __construct()
@@ -26,13 +27,20 @@ class Kernel
         // Initializing HTTP server request message from globals
         $request = ServerRequest::createFromGlobals();
 
+        // Retrieving middleware
+        $this->middlewares = require(dirname(__DIR__) . '/config/middleware.php');
+
         // Setting up container
         $container = $this->container = new Container();
         $this->setupContainer();
 
+
         // Delegating request handling and retrieving to request handler
         $mainHandler = $container->get(StackRequestHandler::class);
-        $response = $mainHandler->handle($request);
+        foreach ($this->middlewares as $middleware) {
+            $mainHandler->add($container->get($middleware));
+        }
+        $response = $mainHandler->handle($container->get(ServerRequest::class));
 
         // Writing response
         $this->writeToOutput($response);
@@ -42,23 +50,28 @@ class Kernel
     {
         $di = $this->container;
 
+        // Registering main request
+        $di->register(ServerRequest::class, function () {
+            return ServerRequest::createFromGlobals();
+        }, instantCreate: true);
+
         // Registering main request handlers and default fallback middleware
-        $di->set(StackRequestHandler::class);
-        $di->set(FallbackRequestHandler::class);
-        $di->set(NotFoundMiddleware::class);
+        $di->register(StackRequestHandler::class);
+        $di->register(FallbackRequestHandler::class);
+        $di->register(NotFoundMiddleware::class);
 
         // Registering router & related router classes (such as middleware)
-        $di->set(Router::class);
-        $di->set(Route::class);
+        $di->register(Router::class);
+        $di->register(Route::class);
 
         // Register main middleware
-        $middlewares = require('../middleware.php');
-        foreach ($middlewares as $middleware) {
-            $di->set($middleware);
+
+        foreach ($this->middlewares as $middleware) {
+            $di->register($middleware);
         }
 
         // Registering logger
-        $di->set(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
+        $di->register(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
     }
 
     private function writeToOutput(Response $res) {

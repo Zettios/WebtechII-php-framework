@@ -2,10 +2,12 @@
 
 namespace Webtek\Core\DependencyInjection;
 
+use Closure;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
+use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
 use Webtek\Core\DependencyInjection\Exception\ContainerException;
@@ -31,7 +33,7 @@ class Container implements ContainerInterface
      *
      * @return void
      */
-    public function register(string $id, null|string|array|callable $concrete = null, array $staticParameters = [], bool $singleton = true): void
+    public function register(string $id, null|string|array|callable $concrete = null, array $staticParameters = [], bool $singleton = true, bool $instantCreate = false): void
     {
         if ($concrete === null) {
             $concrete = $id;
@@ -51,9 +53,17 @@ class Container implements ContainerInterface
                 $this->register[$id]["class"] = $concrete;
             }
         } else throw new ContainerException("Could not register " . $id . " due to unknown type: " . gettype($concrete) . ' value: ' . $concrete);
+
+        if ($instantCreate) {
+            if ($singleton) {
+                $this->get($id);
+            } else {
+                throw new ContainerException("Can't instant create a non-singleton.");
+            }
+        }
     }
 
-    public function resolve(ReflectionClass|ReflectionMethod $reflection, array $staticParameters = []): array
+    public function resolve(ReflectionClass|ReflectionMethod|ReflectionFunction $reflection, array $staticParameters = []): array
     {
         if ($reflection instanceof ReflectionClass) {
             $function = $reflection->getConstructor();
@@ -116,13 +126,17 @@ class Container implements ContainerInterface
     public function get(string $id): object
     {
         if (!$this->has($id)) {
-            throw new NotFoundException("Service is not registered.");
+            throw new NotFoundException("Service " . $id .  " is not registered.");
         }
 
         if (isset($this->createdClasses[$id])) return $this->createdClasses[$id];
 
         if (isset($this->register[$id]["factoryCallable"])) {
-            $reflection = new ReflectionMethod($this->register[$id]["factoryCallable"]);
+            if ($this->register[$id]["factoryCallable"] instanceof Closure) {
+                $reflection = new ReflectionFunction($this->register[$id]["factoryCallable"]);
+            } else {
+                $reflection = new ReflectionMethod($this->register[$id]["factoryCallable"]);
+            }
             $params = $this->resolve($reflection);
             $nClass = $reflection->getClosure()(...$params);
         } elseif (isset($this->register[$id]["factory"])) {

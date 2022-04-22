@@ -3,6 +3,7 @@
 namespace Webtek\Core\Http;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\StreamInterface;
 
 class Response implements ResponseInterface
 {
@@ -78,8 +79,8 @@ class Response implements ResponseInterface
     public function __construct(string $protocolVersion,
                                 private int $statusCode,
                                 array $headers = [],
-                                StreamInterface $body = null,
-                                private ?string $textBody = null)
+                                ?StreamInterface $body = null,
+                                private ?string $textBody = "")
     {
         $this->setMessage($protocolVersion, $headers, $body);
 
