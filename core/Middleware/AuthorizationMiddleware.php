@@ -19,6 +19,7 @@ class AuthorizationMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        // TODO: make authentication check
         if (is_not_authenticated) {
             return new Response('1.1', 403, textBody: "Not authorized.");
         }
