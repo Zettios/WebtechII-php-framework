@@ -6,8 +6,7 @@ namespace Webtek\Core\Routing;
 class Route
 {
 
-
-    public function __construct(private string $path, private string $name, private string $method) {}
+    public function __construct(private string $path, private string $method, private ?string $name = null) {}
 
     /**
      * @return string
