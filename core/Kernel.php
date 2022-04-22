@@ -34,7 +34,6 @@ class Kernel
         $container = $this->container = new Container();
         $this->setupContainer();
 
-
         // Delegating request handling and retrieving to request handler
         $mainHandler = $container->get(StackRequestHandler::class);
         foreach ($this->middlewares as $middleware) {
@@ -65,10 +64,12 @@ class Kernel
         $di->register(Route::class);
 
         // Register main middleware
-
         foreach ($this->middlewares as $middleware) {
             $di->register($middleware);
         }
+
+        // Registering all controllers
+        $di->registerControllers();
 
         // Registering logger
         $di->register(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
