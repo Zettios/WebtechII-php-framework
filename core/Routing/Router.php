@@ -4,6 +4,7 @@ namespace Webtek\Core\Routing;
 
 
 //TODO: Error handling
+use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Webtek\Core\Http\Request;
 
@@ -11,6 +12,17 @@ class Router
 {
 
     private array $routes = [];
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
 
     public function getRoute(array $controllers)
     {
