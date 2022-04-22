@@ -3,63 +3,25 @@
 namespace Webtek\Core\Routing;
 
 
-
-use ReflectionClass;
-use Webtek\Controllers\AbstractController;
-use Webtek\Core\RequestHandling\Request;
-
 //TODO: Error handling
+use ReflectionClass;
+use Webtek\Core\Http\Request;
+
 class Router
 {
-    public array $routes = [];
-    public array $controllers = [];
-    public object $config;
 
-    public function getConfig(): object
+    private array $routes = [];
+
+    public function getRoute(array $controllers)
     {
-        if (file_get_contents("../config/RouteConfig.json") === false) {
-            echo "RouteConfig.json not found in folder config.";
-        }
-        //TODO: Error handling
-
-        $routes = file_get_contents("../config/RouteConfig.json");
-        return $routes = json_decode($routes);
-    }
-
-    public function registerControllers(string $dir = "../controllers")
-    {
-        $controllers = array_slice(scandir($dir), 2);
         foreach ($controllers as $controller){
-            $path = $dir."/".$controller;
-            if (is_dir($path)){
-                $this->registerControllers($path);
-            } else {
-                if (str_ends_with($controller, ".php")) {
-                    $controller = substr($controller, 0, -4);
-                    foreach ($this->config->routes as $route){
-                        if ($route->source === $dir){
-                            $controllerPath = $route->psr4.$controller;
-                            $refl = new ReflectionClass($controllerPath);
-
-                            if (!$refl->isAbstract()){
-                                $this->controllers[$controller] = $refl;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public function getRoute(array $reflcControllers)
-    {
-        foreach ($reflcControllers as $reflcController){
-            foreach ($reflcController->getMethods() as $method){
+            $refl = new ReflectionClass($controller);
+            foreach ($refl->getMethods() as $method){
                 $attributes = $method->getAttributes(Route::class);
                 foreach ($attributes as $attribute){
                     $route = $attribute->newInstance();
 
-                    $this->register($route->getMethod(), $route->getPath(), [$reflcController->getName(), $method->getName()]);
+                    $this->register($route->getMethod(), $route->getPath(), [$refl->getName(), $method->getName()]);
                 }
             }
         }
@@ -92,11 +54,8 @@ class Router
         }
     }
 
-    //TODO: Error handling
-    public function resolve(Request $request) {
-        $this->config = $this->getConfig();
-        $this->registerControllers();
-        $this->getRoute($this->controllers);
+    public function resolve(Request $request, array $controllers) {
+        $this->getRoute($controllers);
         $response = $this->getView($request);
         echo $response;
     }
