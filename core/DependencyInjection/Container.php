@@ -13,26 +13,29 @@ use Webtek\Core\DependencyInjection\Exception\NotFoundException;
 
 class Container implements ContainerInterface
 {
-    public array $registeredClasses = [];
-    public array $createdClasses = [];
+    private array $registeredClasses = [];
+    private array $registeredFactories = [];
+    private array $createdClasses = [];
 
     /**
      * Registers which class to use for certain classfqcn/interface/class name in constructors.
      *
      * @param string $id ID, or parameter type used in constructors or methods.
-     * @param ?string $class The actual class that the id wants to fetch whenever resolving
+     * @param null|string|callable $concrete The actual class that the id wants to fetch whenever resolving, or factory callable that will return that class.
      * @param array $staticParameters Configuration of manually defined parameters
      *
      * @return void
      */
-    public function set(string $id, string $class = null, array $staticParameters = []): void
+    public function set(string $id, null|string|callable $concrete = null, array $staticParameters = []): void
     {
-        if ($class === null) {
-            $class = $id;
+        if ($concrete === null) {
+            $concrete = $id;
+        } elseif (is_callable($concrete)) {
+
         }
 
         $this->registeredClasses[$id] = [
-            "class" => $class,
+            "class" => $concrete,
             "staticParameters" => $staticParameters
         ];
     }

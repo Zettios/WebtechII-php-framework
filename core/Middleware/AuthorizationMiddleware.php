@@ -6,13 +6,10 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Webtek\Core\Routing\Router;
+use Webtek\Core\Http\Response;
 
-class RoutingMiddleware implements MiddlewareInterface
+class AuthorizationMiddleware implements MiddlewareInterface
 {
-
-    public function __construct(private Router $router) {}
-
     /**
      * Process an incoming server request.
      *
@@ -22,7 +19,9 @@ class RoutingMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        // Check if url route exists in router
-        $handler->handle($request);
+        if (is_not_authenticated) {
+            return new Response('1.1', 403, textBody: "Not authorized.");
+        }
+        return $handler->handle($request);
     }
 }

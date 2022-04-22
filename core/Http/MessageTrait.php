@@ -4,7 +4,8 @@ namespace Webtek\Core\Http;
 
 use Psr\Http\Message\StreamInterface;
 
-trait MessageTrait {
+trait MessageTrait
+{
 
     private array $AVAILABLE_PROTOCOL_VERSIONS = ["1.0", "1.1", "2.0"];
 

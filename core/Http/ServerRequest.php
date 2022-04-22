@@ -6,7 +6,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
 
-class ServerRequest extends Request implements ServerRequestInterface {
+class ServerRequest extends Request implements ServerRequestInterface
+{
 
     public function __construct(string $method,
                                 UriInterface|string $uri,
@@ -19,7 +20,8 @@ class ServerRequest extends Request implements ServerRequestInterface {
                                 private array $queryParams = [],
                                 private array $uploadedFiles = [],
                                 private array $parsedBody = [],
-                                private $attributes = [])
+                                private array $attributes = [],
+                                private array $sessionParams = [])
     {
         parent::__construct($method, $uri, $protocolVersion, $headers, $body, $requestTarget);
     }

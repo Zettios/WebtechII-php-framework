@@ -25,7 +25,8 @@ use Psr\Http\Message\UriInterface;
  *
  * @link http://tools.ietf.org/html/rfc3986 (the URI specification)
  */
-class Uri implements UriInterface {
+class Uri implements UriInterface
+{
     private const KNOWN_SCHEMES = ["http"=>80, "https"=>443, "ssh" => 21];
 
     public function __construct(private string $scheme,

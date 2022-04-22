@@ -3,12 +3,12 @@
     {
       "path": "/",
       "source": "../controllers",
-      "psr4": "Webtek\\Controllers\\"
+      "psr4": "App\\Controller\\"
     },
     {
       "path": "/admin",
       "source": "../controllers/admin",
-      "psr4": "Webtek\\Controllers\\Admin\\"
+      "psr4": "App\\Controller\\Admin\\"
     }
   ]
 }

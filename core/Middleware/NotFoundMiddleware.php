@@ -8,7 +8,8 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Webtek\Core\Http\Response;
 
-class NotFoundMiddleware implements MiddlewareInterface {
+class NotFoundMiddleware implements MiddlewareInterface
+{
 
     /**
      * Process an incoming server request.

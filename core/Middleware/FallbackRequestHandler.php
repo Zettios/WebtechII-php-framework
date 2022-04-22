@@ -7,7 +7,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Webtek\Core\Http\Response;
 
-class FallbackRequestHandler implements RequestHandlerInterface {
+class FallbackRequestHandler implements RequestHandlerInterface
+{
     
     public function __construct(private NotFoundMiddleware $notFoundMiddleware) {}
 
