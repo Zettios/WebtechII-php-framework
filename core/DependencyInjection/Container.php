@@ -16,6 +16,7 @@ class Container implements ContainerInterface
 {
     private array $register = [];
     private array $createdClasses = [];
+    public array $registeredControllers = [];
 
     public function __construct() {
         $this->register(ContainerInterface::class, self::class);
@@ -51,6 +52,49 @@ class Container implements ContainerInterface
                 $this->register[$id]["class"] = $concrete;
             }
         } else throw new ContainerException("Could not register " . $id . " due to unknown type: " . gettype($concrete) . ' value: ' . $concrete);
+    }
+
+    public function registerControllers(string $dir = "../src/Controller"): int
+    {
+        $routes = $this->getConfig();
+
+        if ($routes === null) {
+            return 0;
+        }
+
+        $controllers = array_slice(scandir($dir), 2);
+        foreach ($controllers as $controller){
+            $path = $dir."/".$controller;
+            if (is_dir($path)){
+                $this->registerControllers($path);
+            } else {
+                if (str_ends_with($controller, ".php")) {
+                    $controller = substr($controller, 0, -4);
+                    foreach ($routes->routes as $route) {
+                        if ($route->source === $dir) {
+                            $controllerPath = $route->psr4 . "\\".$controller;
+                            $refl = new ReflectionClass($controllerPath);
+                            if (!$refl->isAbstract()) {
+                                $createdController = $refl->newInstance();
+                                $this->registeredControllers[$controller] = $createdController;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return 1;
+    }
+
+    public function getConfig(): ?object
+    {
+        if (file_get_contents("../config/RouteConfig.json") === false) {
+            echo "RouteConfig.json not found in folder config.";
+            return null;
+        }
+
+        $routes = file_get_contents("../config/RouteConfig.json");
+        return json_decode($routes);
     }
 
     public function resolve(ReflectionClass|ReflectionMethod $reflection, array $staticParameters = []): array

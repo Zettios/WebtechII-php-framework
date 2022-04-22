@@ -31,11 +31,11 @@ class Kernel
         $this->setupContainer();
 
         // Delegating request handling and retrieving to request handler
-        $mainHandler = $container->get(StackRequestHandler::class);
-        $response = $mainHandler->handle($request);
+        //$mainHandler = $container->get(StackRequestHandler::class);
+        //$response = $mainHandler->handle($request);
 
         // Writing response
-        $this->writeToOutput($response);
+        //$this->writeToOutput($response);
     }
 
     public function setupContainer(): void
@@ -43,22 +43,25 @@ class Kernel
         $di = $this->container;
 
         // Registering main request handlers and default fallback middleware
-        $di->set(StackRequestHandler::class);
-        $di->set(FallbackRequestHandler::class);
-        $di->set(NotFoundMiddleware::class);
+        $di->register(StackRequestHandler::class);
+        $di->register(FallbackRequestHandler::class);
+        $di->register(NotFoundMiddleware::class);
 
         // Registering router & related router classes (such as middleware)
-        $di->set(Router::class);
-        $di->set(Route::class);
+        $di->register(Router::class);
+        $di->register(Route::class);
+
+        // Registering all controllers
+        $di->registerControllers();
 
         // Register main middleware
-        $middlewares = require('../middleware.php');
+        $middlewares = require('../config/middleware.php');
         foreach ($middlewares as $middleware) {
-            $di->set($middleware);
+            $di->register($middleware);
         }
 
         // Registering logger
-        $di->set(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
+        $di->register(LoggerInterface::class, Logger::class, ["name" => "webtek"]);
     }
 
     private function writeToOutput(Response $res) {
