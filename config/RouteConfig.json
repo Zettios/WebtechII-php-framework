@@ -2,11 +2,13 @@
   "routes": [
     {
       "path": "/",
-      "source": "../src/Controller/"
+      "source": "../controllers",
+      "psr4": "Webtek\\Controllers\\"
     },
     {
       "path": "/admin",
-      "source": "../src/Controller/admin"
+      "source": "../controllers/admin",
+      "psr4": "Webtek\\Controllers\\Admin\\"
     }
   ]
 }

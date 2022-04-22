@@ -3,45 +3,101 @@
 namespace Webtek\Core\Routing;
 
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Psr\Log\LoggerInterface;
 
-class Router implements MiddlewareInterface
+use ReflectionClass;
+use Webtek\Controllers\AbstractController;
+use Webtek\Core\RequestHandling\Request;
+
+//TODO: Error handling
+class Router
 {
-    public function __construct(private LoggerInterface $logger) {}
+    public array $routes = [];
+    public array $controllers = [];
+    public object $config;
 
-    /**
-     * Process an incoming server request.
-     *
-     * Processes an incoming server request in order to produce a response.
-     * If unable to produce the response itself, it may delegate to the provided
-     * request handler to do so.
-     */
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    public function getConfig(): object
     {
-        $path = $request->getUri()->getPath();
-        $method = $request->getMethod();
-
-        if (!$routes = file_get_contents("../config/RouteConfig.json")) {
-            $this->logger->error("RouteConfig.json not found in folder config.");
+        if (file_get_contents("../config/RouteConfig.json") === false) {
+            echo "RouteConfig.json not found in folder config.";
         }
+        //TODO: Error handling
 
-        $routes = json_decode($routes);
+        $routes = file_get_contents("../config/RouteConfig.json");
+        return $routes = json_decode($routes);
+    }
 
-        foreach($routes->routes as $item) {
-            if ($item->path === $path) {
-                $sources = array_slice(scandir($item->source),2);
-                foreach ($sources as $controllers) {
-                    if (str_ends_with($controllers, ".php")) {
-                        $this->logger->info("Controller found: " . substr($controllers, 0, -4));
+    public function registerControllers(string $dir = "../controllers")
+    {
+        $controllers = array_slice(scandir($dir), 2);
+        foreach ($controllers as $controller){
+            $path = $dir."/".$controller;
+            if (is_dir($path)){
+                $this->registerControllers($path);
+            } else {
+                if (str_ends_with($controller, ".php")) {
+                    $controller = substr($controller, 0, -4);
+                    foreach ($this->config->routes as $route){
+                        if ($route->source === $dir){
+                            $controllerPath = $route->psr4.$controller;
+                            $refl = new ReflectionClass($controllerPath);
+
+                            if (!$refl->isAbstract()){
+                                $this->controllers[$controller] = $refl;
+                            }
+                        }
                     }
                 }
             }
         }
+    }
 
-        return $handler->handle($request);
+    public function getRoute(array $reflcControllers)
+    {
+        foreach ($reflcControllers as $reflcController){
+            foreach ($reflcController->getMethods() as $method){
+                $attributes = $method->getAttributes(Route::class);
+                foreach ($attributes as $attribute){
+                    $route = $attribute->newInstance();
+
+                    $this->register($route->getMethod(), $route->getPath(), [$reflcController->getName(), $method->getName()]);
+                }
+            }
+        }
+    }
+
+    public function register(string $requestMethod, string $route, callable|array $callable): self
+    {
+        $this->routes[$requestMethod][$route] = $callable;
+
+        return $this;
+    }
+
+    public function getView(Request $request): string
+    {
+        $uri = $request->getUri()->getPath();
+        $requestMethod = $request->getMethod();
+        if (array_key_exists($uri, $this->routes[$requestMethod])){
+            return call_user_func($this->routes[$requestMethod][$uri]);
+        } else {
+            if (str_ends_with($uri, "/")) {
+                $uri = substr($uri, 0, -1);
+                if (array_key_exists($uri, $this->routes[$requestMethod])) {
+                    return call_user_func($this->routes[$requestMethod][$uri]);
+                } else {
+                    return "";
+                }
+            } else {
+                return "";
+            }
+        }
+    }
+
+    //TODO: Error handling
+    public function resolve(Request $request) {
+        $this->config = $this->getConfig();
+        $this->registerControllers();
+        $this->getRoute($this->controllers);
+        $response = $this->getView($request);
+        echo $response;
     }
 }

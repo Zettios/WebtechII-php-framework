@@ -2,18 +2,36 @@
 
 namespace Webtek\Core\Routing;
 
-use Psr\Container\ContainerInterface;
-
-class AbstractController
+abstract class AbstractController
 {
-    protected $container;
-
-    public function setContainer(ContainerInterface $container): ?ContainerInterface
+    protected static function render(string $templateToFind): string
     {
-        $previous = $this->container;
-        $this->container = $container;
-
-        return $previous;
+        return self::getTemplates($templateToFind);
     }
 
+    protected static function getTemplates(string $templateToFind, string $dir = "../template"): string
+    {
+        $templates = array_slice(scandir($dir), 2);
+
+        if (empty($templates)){
+            return "";
+        } else {
+            foreach ($templates as $template){
+                $path = $dir."/".$template;
+                if (is_dir($path)){
+                    $template = self::getTemplates($templateToFind, $path);
+                    if ($template !== ""){
+                        return $template;
+                    }
+                } else {
+                    if (str_ends_with($template, ".html")) {
+                        if ($template === $templateToFind){
+                            return file_get_contents($path);
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+    }
 }

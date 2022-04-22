@@ -2,17 +2,12 @@
 
 namespace Webtek\Core\Routing;
 
-#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
+#[\Attribute(\Attribute::IS_REPEATABLE | \Attribute::TARGET_METHOD)]
 class Route
 {
-    private string $path;
-    private string $method;
 
-    public function __construct(string $path, string $method)
-    {
-        $this->setPath($path);
-        $this->setMethod($method);
-    }
+
+    public function __construct(private string $path, private string $name, private string $method) {}
 
     /**
      * @return string
@@ -44,5 +39,21 @@ class Route
     public function setMethod(string $method): void
     {
         $this->method = $method;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName(string $name): void
+    {
+        $this->name = $name;
     }
 }
