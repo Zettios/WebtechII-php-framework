@@ -6,6 +6,7 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionNamedType;
 use Webtek\Core\DependencyInjection\Exception\ContainerException;
 use Webtek\Core\DependencyInjection\Exception\NotFoundException;
@@ -13,40 +14,56 @@ use Webtek\Core\DependencyInjection\Exception\NotFoundException;
 
 class Container implements ContainerInterface
 {
-    private array $registeredClasses = [];
-    private array $registeredFactories = [];
+    private array $register = [];
     private array $createdClasses = [];
+
+    public function __construct() {
+        $this->register(ContainerInterface::class, self::class);
+        $this->createdClasses[ContainerInterface::class] = $this;
+    }
 
     /**
      * Registers which class to use for certain classfqcn/interface/class name in constructors.
      *
      * @param string $id ID, or parameter type used in constructors or methods.
-     * @param null|string|callable $concrete The actual class that the id wants to fetch whenever resolving, or factory callable that will return that class.
+     * @param null|string|array|callable $concrete The actual class that the id wants to fetch whenever resolving, or factory callable that will return that class.
      * @param array $staticParameters Configuration of manually defined parameters
      *
      * @return void
      */
-    public function set(string $id, null|string|callable $concrete = null, array $staticParameters = []): void
+    public function register(string $id, null|string|array|callable $concrete = null, array $staticParameters = [], bool $singleton = true): void
     {
         if ($concrete === null) {
             $concrete = $id;
-        } elseif (is_callable($concrete)) {
-
         }
 
-        $this->registeredClasses[$id] = [
-            "class" => $concrete,
-            "staticParameters" => $staticParameters
+        $this->register[$id] = [
+            "staticParameters" => $staticParameters,
+            "singleton" => $singleton
         ];
+
+        if (is_callable($concrete)) {
+            $this->register[$id]["factoryCallable"] = $concrete;
+        } elseif (gettype($concrete) == "string") {
+            if (class_implements($concrete) && in_array(FactoryInterface::class, class_implements($concrete))) {
+                $this->register[$id]["factory"] = $concrete;
+            } else {
+                $this->register[$id]["class"] = $concrete;
+            }
+        } else throw new ContainerException("Could not register " . $id . " due to unknown type: " . gettype($concrete) . ' value: ' . $concrete);
     }
 
-    public function resolve(ReflectionClass $reflection, array $staticParameters = []): array
+    public function resolve(ReflectionClass|ReflectionMethod $reflection, array $staticParameters = []): array
     {
-        $cons = $reflection->getConstructor();
+        if ($reflection instanceof ReflectionClass) {
+            $function = $reflection->getConstructor();
+        } else {
+            $function = $reflection;
+        }
         $params = [];
 
-        if (isset($cons)) {
-            foreach ($cons->getParameters() as $param) {
+        if (isset($function)) {
+            foreach ($function->getParameters() as $param) {
                 $paramName = $param->getName();
                 $paramType = $param->getType();
 
@@ -85,6 +102,7 @@ class Container implements ContainerInterface
         return $params;
     }
 
+
     /**
      * Finds an entry of the container by its identifier and returns it.
      *
@@ -103,11 +121,26 @@ class Container implements ContainerInterface
 
         if (isset($this->createdClasses[$id])) return $this->createdClasses[$id];
 
-        $reflection = new ReflectionClass($this->registeredClasses[$id]["class"]);
-        $params = $this->resolve($reflection, $this->registeredClasses[$id]["staticParameters"]);
-        $nClass = $reflection->newInstance(...$params);
-        $this->createdClasses[$id] = $nClass;
+        if (isset($this->register[$id]["factoryCallable"])) {
+            $reflection = new ReflectionMethod($this->register[$id]["factoryCallable"]);
+            $params = $this->resolve($reflection);
+            $nClass = $reflection->getClosure()(...$params);
+        } elseif (isset($this->register[$id]["factory"])) {
+            $reflection = new ReflectionClass($this->register[$id]["factory"]);
+            $params = $this->resolve($reflection, $this->register[$id]["staticParameters"]);
+            $factory = $reflection->newInstance(...$params);
+            $nClass = $factory->newInstance();
+        } elseif (isset($this->register[$id]["class"])) {
+            $reflection = new ReflectionClass($this->register[$id]["class"]);
+            $params = $this->resolve($reflection, $this->register[$id]["staticParameters"]);
+            $nClass = $reflection->newInstance(...$params);
+        } else {
+            throw new ContainerException("Container could not figure out whether or not registered entry concrete contained was class, factory or callable.");
+        }
+
+        if ($this->register[$id]["singleton"]) $this->createdClasses[$id] = $nClass;
         return $nClass;
+
     }
 
     /**
@@ -123,6 +156,6 @@ class Container implements ContainerInterface
      */
     public function has(string $id): bool
     {
-        return array_key_exists($id, $this->registeredClasses);
+        return array_key_exists($id, $this->register);
     }
 }
