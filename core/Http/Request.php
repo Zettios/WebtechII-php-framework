@@ -11,7 +11,7 @@ class Request implements RequestInterface
 {
     use MessageTrait;
 
-    private const AVAILABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+    private const AVAILABLE_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "TRACE", "CONNECT", "HEAD"];
 
     private string $method;
     private Uri $uri;

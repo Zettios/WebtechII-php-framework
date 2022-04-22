@@ -1,6 +1,6 @@
 <?php
 
-namespace Webtek\Controllers\Admin;
+namespace Webtek\Controller\Admin;
 
 use Webtek\Core\Routing\AbstractController;
 use Webtek\Core\Routing\Route;
