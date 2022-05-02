@@ -27,7 +27,6 @@ class Router
                 $attributes = $method->getAttributes(Route::class);
                 foreach ($attributes as $attribute){
                     $route = $attribute->newInstance();
-
                     $this->register($route->getMethod(), $route->getPath(), [$refl->getName(), $method->getName()]);
                 }
             }
@@ -37,21 +36,40 @@ class Router
     public function register(string $requestMethod, string $route, callable|array $callable): self
     {
         $this->routes[$requestMethod][$route] = $callable;
-
         return $this;
+    }
+
+    public function createArguments(string $queryString): ?array
+    {
+        $arr = preg_split('/[&|=]/', $queryString);
+        $args = [];
+        for ($i = 0; $i < sizeof($arr); $i+=2) {
+            if ($i+1 > sizeof($arr)-1){
+                $args[$arr[$i]] = "";
+            } else {
+                $args[$arr[$i]] = $arr[$i+1];
+            }
+            if ($i+2 > sizeof($arr)-1) {
+                break;
+            }
+        }
+        return $args;
     }
 
     public function getView(Request $request): ?string
     {
         $uri = $request->getUri()->getPath();
+        $query = $request->getUri()->getQuery();
+        $args = $this->createArguments($query);
         $requestMethod = $request->getMethod();
+
         if (array_key_exists($uri, $this->routes[$requestMethod])){
-            return call_user_func($this->routes[$requestMethod][$uri]);
+            return call_user_func($this->routes[$requestMethod][$uri], $args);
         } else {
             if (str_ends_with($uri, "/")) {
                 $uri = substr($uri, 0, -1);
                 if (array_key_exists($uri, $this->routes[$requestMethod])) {
-                    return call_user_func($this->routes[$requestMethod][$uri]);
+                    return call_user_func($this->routes[$requestMethod][$uri], $args);
                 } else {
                     return null;
                 }
