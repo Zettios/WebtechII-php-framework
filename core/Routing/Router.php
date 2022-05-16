@@ -56,7 +56,7 @@ class Router
         return $args;
     }
 
-    public function getView(Request $request): ?string
+    public function getView(Request $request): ?array
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
@@ -64,12 +64,14 @@ class Router
         $requestMethod = $request->getMethod();
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
-            return call_user_func($this->routes[$requestMethod][$uri], $args);
+            $body = call_user_func($this->routes[$requestMethod][$uri], $args);
+            return array_merge(["webpage" => $body], ["args" => $args]);
         } else {
             if (str_ends_with($uri, "/")) {
                 $uri = substr($uri, 0, -1);
                 if (array_key_exists($uri, $this->routes[$requestMethod])) {
-                    return call_user_func($this->routes[$requestMethod][$uri], $args);
+                    $body = call_user_func($this->routes[$requestMethod][$uri], $args);
+                    return array_merge(["webpage" => $body], ["args" => $args]);
                 } else {
                     return null;
                 }
@@ -82,7 +84,6 @@ class Router
     public function resolve(Request $request) {
         $controllers = $this->container->registeredControllers;
         $this->getRoute($controllers);
-        $response = $this->getView($request);
-        return $response;
+        return $this->getView($request);
     }
 }

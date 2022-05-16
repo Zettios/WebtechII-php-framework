@@ -16,6 +16,7 @@ use Webtek\Core\Middleware\RoutingMiddleware;
 use Webtek\Core\Middleware\StackRequestHandler;
 use Webtek\Core\Routing\Route;
 use Webtek\Core\Routing\Router;
+use Webtek\Core\Templating\TemplateEngine;
 
 class Kernel
 {
@@ -62,6 +63,7 @@ class Kernel
         // Registering router & related router classes (such as middleware)
         $di->register(Router::class);
         $di->register(Route::class);
+        $di->register(TemplateEngine::class);
 
         // Register main middleware
         foreach ($this->middlewares as $middleware) {
