@@ -19,8 +19,11 @@ class TemplatingMiddleware implements MiddlewareInterface
         $body = $request->getParsedBody();
 
         if (is_array($body)) {
+            // === Views ===
+            $body["webpage"] = $this->templateEngine->processExtends($body["webpage"]);
+
             // === Arguments ==
-            echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);
+            //echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);
         }
 
 
