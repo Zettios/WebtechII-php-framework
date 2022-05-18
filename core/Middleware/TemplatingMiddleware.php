@@ -19,11 +19,11 @@ class TemplatingMiddleware implements MiddlewareInterface
         $body = $request->getParsedBody();
 
         if (is_array($body)) {
-            // === Views ===
+            // === Block handling ===
             $body["webpage"] = $this->templateEngine->processExtends($body["webpage"]);
 
-            // === Arguments ==
-            //echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);
+            // === Argument handling ==
+            echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);
         }
 
 
@@ -31,6 +31,6 @@ class TemplatingMiddleware implements MiddlewareInterface
 //        // === Blocks ==
 //        $this->templateEngine->processBlocks($request);
 
-        return new Response('1.1', 200, textBody: "Success");;
+        return new Response('1.1', 200, textBody: "");;
     }
 }

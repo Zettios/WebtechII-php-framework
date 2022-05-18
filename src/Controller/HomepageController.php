@@ -10,6 +10,6 @@ class HomepageController extends AbstractController
     #[Route(path: "/", method: "GET")]
     public static function home(array $args): string
     {
-        return self::render("home.html");
+        return self::render("child.html");
     }
 }

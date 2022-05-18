@@ -2,11 +2,14 @@
 
 namespace Webtek\Core\Templating;
 
-use Psr\Http\Message\ResponseInterface;
-use Webtek\Core\Http\ServerRequest;
 
 class TemplateEngine
 {
+    public function processBlocks(string $body): string {
+
+        return $body;
+    }
+
     public function processExtends(string $body): string
     {
         $needle = "extend(";
@@ -25,43 +28,39 @@ class TemplateEngine
             $lastPos = $lastPos + strlen($needle);
         }
 
+
         foreach (array_keys($extends) as $file) {
-            $body = $this->insertExtends($body, $file, $extends[$file]);
-            echo $body;
+            $extendContent = $this->getTemplates($body, $file);
+            if ($extendContent === "") {
+                $extendContent = "[ Template ". $file." not found ]";
+            }
+            $body = str_replace($extends[$file], $extendContent, $body);
         }
-
-
-
         return $body;
     }
 
-    public function insertExtends(string $body, string $fileToFind, string $valueToReplace, string $dir = "../template"): string
+    public function getTemplates(string $body, string $fileToFind, string $dir = "../template"): string
     {
-        //TODO: werkt bijna, moet nog even goed afhandelen met de gevonden bestand.
         $foundFiles = array_slice(scandir($dir), 2);
-
         if (empty($foundFiles)){
             return $body;
         } else {
             foreach ($foundFiles as $file) {
                 $path = $dir . "/" . $file;
                 if (is_dir($path)) {
-                    $body = $this->insertExtends($body, $fileToFind, $valueToReplace, $path);
-                    return $body;
+                    $content = $this->getTemplates($body, $fileToFind, $path);
+                    if ($content !== "") {
+                        return $content;
+                    }
                 } else {
-                    echo $file."<br>";
                     if ($file === $fileToFind) {
-                        echo "Found file!<br>";
-                        $content = file_get_contents($path);
-                        echo $content;
-                        $body = str_replace($valueToReplace, $content, $body);
-                        return $body;
+                        return file_get_contents($path);
                     }
                 }
             }
         }
 
-        return $body;
+        return "";
     }
 
     public function processArguments(string $body, array $queryArgs): string
@@ -93,51 +92,5 @@ class TemplateEngine
         }
 
         return $body;
-    }
-
-
-    public function processBlocks2(ResponseInterface $response)
-    {
-        $body = $response->getTextBody();
-        $needleBlock = "{%";
-        $lastPos = 0;
-        $blocks = array();
-        $positionsBlock = array();
-
-        $array = str_split($body);
-        print_r($array);
-
-    }
-
-    public function processBlocks(ServerRequest $serverRequest): ResponseInterface
-    {
-        $body = $response->getTextBody();
-        $needleBlock = "{%";
-        $lastPos = 0;
-        $blocks = array();
-        $positionsBlock = array();
-
-
-        while (($lastPos = strpos($body, $needleBlock, $lastPos)) !== false) {
-            $positionsBlock[] = $lastPos;
-            $lastPos = $lastPos + strlen($needleBlock);
-        }
-
-        foreach ($positionsBlock as $currentPos) {
-            $pos = $currentPos;
-            $block = "";
-            while ($body[$pos].$body[$pos+1] !== "%}") {
-                $block .= $body[$pos];
-                $pos++;
-
-            }
-            $blocks[] = $block."%}";
-        }
-
-        foreach ($blocks as $block){
-            $body = str_replace($block, "Pogie", $body);
-        }
-
-        return $response->withTextBody($body);
     }
 }
