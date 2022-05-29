@@ -19,8 +19,11 @@ class TemplatingMiddleware implements MiddlewareInterface
         $body = $request->getParsedBody();
 
         if (is_array($body)) {
+            // === Extend handling ===
+            $parent = $this->templateEngine->processExtend($body["webpage"]);
+
             // === Block handling ===
-            $body["webpage"] = $this->templateEngine->processExtends($body["webpage"]);
+            $body["webpage"] = $this->templateEngine->processBlocks($body["webpage"], $parent);
 
             // === Argument handling ==
             echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);

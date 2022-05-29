@@ -5,38 +5,73 @@ namespace Webtek\Core\Templating;
 
 class TemplateEngine
 {
-    public function processBlocks(string $body): string {
+    public function processBlocks(string $child, string $parent): string
+    {
+        $childBlocks = $this->getBlocks($child);
+        $parentBlocks = $this->getBlocks($parent);
 
-        return $body;
+        foreach ($parentBlocks as $key => $parentBlock) {
+            if (array_key_exists($key, $childBlocks)) {
+                $parent = str_replace($parentBlock, $childBlocks[$key], $parent);
+                $parent = str_replace("blockstart(".$key.")", "", $parent);
+                $parent = str_replace("blockend(".$key.")", "", $parent);
+            }
+        }
+
+        return $parent;
     }
 
-    public function processExtends(string $body): string
+    public function getBlocks($body): array
     {
-        $needle = "extend(";
+        $needle = "blockstart(";
         $lastPos = 0;
-        $extends = array();
+        $positions = array();
+        $blockNames = array();
 
         while (($lastPos = strpos($body, $needle, $lastPos))!== false) {
-            $extend = "";
-            while ($body[$lastPos] !== ")"){
-                $extend = $extend.$body[$lastPos];
-                $lastPos++;
-            }
-            $key = explode($needle,$extend);
-            $extend = $extend.$body[$lastPos++];
-            $extends[$key[1]] = $extend;
+            $positions[] = $lastPos;
             $lastPos = $lastPos + strlen($needle);
         }
 
-
-        foreach (array_keys($extends) as $file) {
-            $extendContent = $this->getTemplates($body, $file);
-            if ($extendContent === "") {
-                $extendContent = "[ Template ". $file." not found ]";
+        foreach ($positions as $value) {
+            $arg = "";
+            while ($body[$value] != ")") {
+                $arg = $arg.$body[$value];
+                $value++;
             }
-            $body = str_replace($extends[$file], $extendContent, $body);
+            $key = explode($needle, $arg);
+            $blockNames[$key[1]] = "1";
         }
-        return $body;
+
+        foreach ($blockNames as $key => $blockName) {
+            $blockNames[$key] = $this->get_string_between($body, "blockstart(".$key.")", "blockend(".$key.")");
+        }
+
+        return $blockNames;
+    }
+
+    public function get_string_between($string, $start, $end): string
+    {
+        $startPos = strpos($string, $start);
+        $content = "";
+        while (substr($string, $startPos, strlen($end)) !== $end) {
+            $content .= $string[$startPos];
+            $startPos++;
+        }
+        return $content.$end;
+    }
+
+    public function processExtend(string $body): string
+    {
+        $needle = "extend(";
+        $firstPos = strpos($body, $needle);
+        $extend = "";
+        while ($body[$firstPos] !== ")"){
+            $extend = $extend.$body[$firstPos];
+            $firstPos++;
+        }
+        $fileToExtend = explode($needle,$extend);
+        return $this->getTemplates($body, $fileToExtend[1]);
     }
 
     public function getTemplates(string $body, string $fileToFind, string $dir = "../template"): string
