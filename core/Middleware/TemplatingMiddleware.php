@@ -20,19 +20,18 @@ class TemplatingMiddleware implements MiddlewareInterface
 
         if (is_array($body)) {
             // === Extend handling ===
-            $parent = $this->templateEngine->processExtend($body["webpage"]);
+            if (str_contains($body["webpage"], 'extend(')) {
+                $parent = $this->templateEngine->processExtend($body["webpage"]);
 
-            // === Block handling ===
-            $body["webpage"] = $this->templateEngine->processBlocks($body["webpage"], $parent);
+                // === Block handling ===
+                $body["webpage"] = $this->templateEngine->processBlocks($body["webpage"], $parent);
+            } else {
+                echo "<h1>Extend keyword does not exist. Blocks will not function</h1><br>";
+            }
 
             // === Argument handling ==
             echo $this->templateEngine->processArguments($body["webpage"], $body["args"]);
         }
-
-
-//
-//        // === Blocks ==
-//        $this->templateEngine->processBlocks($request);
 
         return new Response('1.1', 200, textBody: "");;
     }

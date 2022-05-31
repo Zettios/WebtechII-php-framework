@@ -2,10 +2,10 @@ extend(base.html)
 <br>
 blockstart(head)
 <link rel="stylesheet" href="styleDFDGDG.css"/>
-<title>Child!</title>
+<title>arg(title)</title>
 blockend(head)
 blockstart(body)
-<h1>Index</h1>
+<h1>Index of arg(name)</h1>
 <p class="important">
   Welcome on my awesome homepage.
 </p>
@@ -13,5 +13,5 @@ arg(test)
 blockend(body)
 
 blockstart(footer)
-&copy; Copyright 2022 by a new footer!
+arg(footer)!
 blockend(footer)

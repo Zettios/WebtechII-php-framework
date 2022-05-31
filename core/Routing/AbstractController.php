@@ -4,9 +4,9 @@ namespace Webtek\Core\Routing;
 
 abstract class AbstractController
 {
-    protected static function render(string $templateToFind): string
+    protected static function render(string $templateToFind, array $args): array
     {
-        return self::getTemplates($templateToFind);
+        return [self::getTemplates($templateToFind), $args];
     }
 
     protected static function getTemplates(string $templateToFind, string $dir = "../template"): string

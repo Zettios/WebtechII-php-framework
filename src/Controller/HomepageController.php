@@ -8,8 +8,12 @@ use Webtek\Core\Routing\Route;
 class HomepageController extends AbstractController
 {
     #[Route(path: "/", method: "GET")]
-    public static function home(array $args): string
+    public static function home(array $args): array
     {
-        return self::render("child.html");
+        $title = "Awesome website!!";
+        $name = "Enrico";
+        $footer = "© Copyright 2022 by a new footer!";
+
+        return self::render("child.html", ['title' => $title, 'footer' => $footer, 'name' => $name]);
     }
 }

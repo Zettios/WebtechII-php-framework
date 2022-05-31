@@ -2,8 +2,6 @@
 
 namespace Webtek\Core\Routing;
 
-
-//TODO: Error handling
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Webtek\Core\Http\Request;
@@ -64,14 +62,14 @@ class Router
         $requestMethod = $request->getMethod();
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
-            $body = call_user_func($this->routes[$requestMethod][$uri], $args);
-            return array_merge(["webpage" => $body], ["args" => $args]);
+            // If the url doesn't end with a "/"
+            return $this->callControllerFunction($requestMethod, $uri, $args);
         } else {
+            // If the url ends with a "/" check for it.
             if (str_ends_with($uri, "/")) {
                 $uri = substr($uri, 0, -1);
                 if (array_key_exists($uri, $this->routes[$requestMethod])) {
-                    $body = call_user_func($this->routes[$requestMethod][$uri], $args);
-                    return array_merge(["webpage" => $body], ["args" => $args]);
+                    return $this->callControllerFunction($requestMethod, $uri, $args);
                 } else {
                     return null;
                 }
@@ -81,7 +79,20 @@ class Router
         }
     }
 
-    public function resolve(Request $request) {
+    public function callControllerFunction($requestMethod, $uri, $args): array
+    {
+        $body = call_user_func($this->routes[$requestMethod][$uri], $args);
+
+        if (count($body[1]) !== 0) {
+            foreach ($body[1] as $key => $value) {
+                $args[$key] = $value;
+            }
+        }
+        return array_merge(["webpage" => $body[0]], ["args" => $args]);
+    }
+
+    public function resolve(Request $request)
+    {
         $controllers = $this->container->registeredControllers;
         $this->getRoute($controllers);
         return $this->getView($request);

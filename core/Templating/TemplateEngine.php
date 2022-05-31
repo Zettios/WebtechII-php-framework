@@ -40,11 +40,13 @@ class TemplateEngine
                 $value++;
             }
             $key = explode($needle, $arg);
-            $blockNames[$key[1]] = "1";
+            $blockNames[$key[1]] = "";
         }
 
         foreach ($blockNames as $key => $blockName) {
-            $blockNames[$key] = $this->get_string_between($body, "blockstart(".$key.")", "blockend(".$key.")");
+            if (str_contains($body, "blockstart(".$key.")") && str_contains($body, "blockend(".$key.")")) {
+                $blockNames[$key] = $this->get_string_between($body, "blockstart(".$key.")", "blockend(".$key.")");
+            }
         }
 
         return $blockNames;
