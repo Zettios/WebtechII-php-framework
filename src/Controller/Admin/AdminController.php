@@ -8,8 +8,12 @@ use Webtek\Core\Routing\Route;
 class AdminController extends AbstractController
 {
     #[Route(path: "/base", method: "GET")]
-    public static function adminHome(): string
+    public static function adminHome(): array
     {
-        return self::render("base.html");
+        $title = "Awesome website!!";
+        $name = "Admin";
+        $test = "This is a test argument!";
+
+        return self::render("admin.html", ['title' => $title, 'name' => $name, 'test' => $test]);
     }
 }

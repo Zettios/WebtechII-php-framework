@@ -38,6 +38,7 @@ class StackRequestHandler implements RequestHandlerInterface
 
         // Select the next first middleware from the stack
         $middleware = array_shift($this->stack);
+
         // Let it be processed by the middleware
         return $middleware->process($request, $this);
     }

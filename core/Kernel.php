@@ -2,10 +2,12 @@
 
 namespace Webtek\Core;
 
+use App\Entity\User;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
+use Webtek\Core\Database\DBConnection;
 use Webtek\Core\DependencyInjection\Container;
 use Webtek\Core\Http\Response;
 use Webtek\Core\Http\ServerRequest;
@@ -41,7 +43,6 @@ class Kernel
             $mainHandler->add($container->get($middleware));
         }
         $response = $mainHandler->handle($container->get(ServerRequest::class));
-
         // Writing response
         $this->writeToOutput($response);
     }
@@ -65,6 +66,9 @@ class Kernel
         $di->register(Route::class);
         $di->register(TemplateEngine::class);
 
+        $di->register(DBConnection::class);
+        $di->register(User::class);
+
         // Register main middleware
         foreach ($this->middlewares as $middleware) {
             $di->register($middleware);
@@ -83,6 +87,7 @@ class Kernel
         }
 
         http_response_code($res->getStatusCode());
+        $this->container->get(User::class)->getAllUsers();
 
         echo $res->getTextBody();
     }

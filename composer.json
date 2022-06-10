@@ -6,7 +6,8 @@
         "psr/http-server-handler": "^1.0",
         "psr/http-server-middleware": "^1.0",
         "monolog/monolog": "^2.4",
-        "psr/container": "^2.0"
+        "psr/container": "^2.0",
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {

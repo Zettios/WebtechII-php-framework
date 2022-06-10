@@ -14,6 +14,6 @@ class HomepageController extends AbstractController
         $name = "Enrico";
         $footer = "© Copyright 2022 by a new footer!";
 
-        return self::render("child.html", ['title' => $title, 'footer' => $footer, 'name' => $name]);
+        return self::render("homepage.html", ['title' => $title, 'footer' => $footer, 'name' => $name]);
     }
 }

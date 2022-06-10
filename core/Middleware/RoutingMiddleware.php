@@ -29,6 +29,7 @@ class RoutingMiddleware implements MiddlewareInterface
 
         if (!is_null($responseText)) {
             $request = $request->withParsedBody($responseText);
+            $request = $request->withAttribute("state", 1);
             return $handler->handle($request);
         } else {
             return new Response('1.1', 404, textBody: "Error");
