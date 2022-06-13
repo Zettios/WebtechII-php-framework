@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Users;
 
 use Webtek\Core\Database\DatabaseEntity;
 use Webtek\Core\Database\DBConnection;
@@ -91,12 +91,10 @@ class User extends DatabaseEntity
         $this->role = $role;
     }
 
-    public function getAllUsers() {
+    public function getAllUsers(): array
+    {
         $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
         $stmt->execute(["Enrico"]);
-        $user = $stmt->fetch();
-        echo "<pre>";
-        print_r($user);
-        echo "</pre>";
+        return $stmt->fetch();
     }
 }

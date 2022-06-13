@@ -20,15 +20,45 @@ class Router
     public function getRoute(array $controllers)
     {
         foreach ($controllers as $controller){
+            print_r($controller);
             $refl = new ReflectionClass($controller);
             foreach ($refl->getMethods() as $method){
+                echo "<pre>";
+                if (str_contains($method->getFileName(), "AbstractController.php")) {
+                    echo "Abstract!<br>";
+                } else {
+                    echo "Method name: ".$method->getName()."<br>";
+                    echo $method->getFileName()."<br>";
+                    print_r($method->getAttributes(Route::class));
+                    $attributes = $method->getAttributes(Route::class);
+                    foreach ($attributes as $attribute){
+                        echo "Path: ".$attribute->newInstance()->getPath();
+                    }
+                    echo "<br><br>Parameters:<br>";
+                    $parameters = [];
+                    foreach ($method->getParameters() as $par) {
+                        echo $par."<br>";
+                        echo $par->getType()."<br><br>";
+                        $parameters[$par->getName()] = $par->getType();
+                    }
+                    print_r($parameters);
+                    echo $parameters[0];
+                }
+
+                echo "<br>=========<br>";
+                echo "</pre>";
+
                 $attributes = $method->getAttributes(Route::class);
                 foreach ($attributes as $attribute){
                     $route = $attribute->newInstance();
-                    $this->register($route->getMethod(), $route->getPath(), [$refl->getName(), $method->getName()]);
+
+                    $this->register($route->getMethod(), $route->getPath(), [$refl->getName(), $method->getName(), "parameters" => []]);
                 }
             }
         }
+        echo "<pre>";
+        print_r($this->routes);
+        echo "</pre>";
     }
 
     public function register(string $requestMethod, string $route, callable|array $callable): self

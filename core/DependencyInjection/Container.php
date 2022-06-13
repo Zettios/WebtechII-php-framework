@@ -2,6 +2,8 @@
 
 namespace Webtek\Core\DependencyInjection;
 
+use App\Entity\CoursePrice;
+use App\Entity\Users\User;
 use Closure;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
@@ -10,6 +12,7 @@ use ReflectionClass;
 use ReflectionFunction;
 use ReflectionMethod;
 use ReflectionNamedType;
+use stdClass;
 use Webtek\Core\DependencyInjection\Exception\ContainerException;
 use Webtek\Core\DependencyInjection\Exception\NotFoundException;
 
@@ -19,6 +22,7 @@ class Container implements ContainerInterface
     private array $register = [];
     private array $createdClasses = [];
     public array $registeredControllers = [];
+    private array $entities = [];
 
     public function __construct() {
         $this->register(ContainerInterface::class, self::class);

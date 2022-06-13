@@ -2,19 +2,15 @@
 
 namespace Webtek\Core;
 
-use App\Entity\User;
-use Monolog\Handler\StreamHandler;
+use App\Entity\Users\User;
 use Monolog\Logger;
-use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
 use Webtek\Core\Database\DBConnection;
 use Webtek\Core\DependencyInjection\Container;
 use Webtek\Core\Http\Response;
 use Webtek\Core\Http\ServerRequest;
-use Webtek\Core\Middleware\AuthorizationMiddleware;
 use Webtek\Core\Middleware\FallbackRequestHandler;
 use Webtek\Core\Middleware\NotFoundMiddleware;
-use Webtek\Core\Middleware\RoutingMiddleware;
 use Webtek\Core\Middleware\StackRequestHandler;
 use Webtek\Core\Routing\Route;
 use Webtek\Core\Routing\Router;
@@ -23,6 +19,7 @@ use Webtek\Core\Templating\TemplateEngine;
 class Kernel
 {
     private array $middlewares;
+    private array $entities;
     private Container $container;
 
     public function __construct()
@@ -32,6 +29,9 @@ class Kernel
 
         // Retrieving middleware
         $this->middlewares = require(dirname(__DIR__) . '/config/middleware.php');
+
+        // Retrieve entities
+        $this->entities = require(dirname(__DIR__) . '/config/entities.php');
 
         // Setting up container
         $container = $this->container = new Container();
@@ -67,11 +67,15 @@ class Kernel
         $di->register(TemplateEngine::class);
 
         $di->register(DBConnection::class);
-        $di->register(User::class);
 
         // Register main middleware
         foreach ($this->middlewares as $middleware) {
             $di->register($middleware);
+        }
+
+        // Register entities
+        foreach ($this->entities as $entity) {
+            $di->register($entity);
         }
 
         // Registering all controllers
@@ -87,7 +91,6 @@ class Kernel
         }
 
         http_response_code($res->getStatusCode());
-        $this->container->get(User::class)->getAllUsers();
 
         echo $res->getTextBody();
     }
