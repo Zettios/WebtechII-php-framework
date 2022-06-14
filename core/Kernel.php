@@ -78,6 +78,7 @@ class Kernel
             $di->register($entity);
         }
 
+
         // Registering all controllers
         $di->registerControllers();
 
