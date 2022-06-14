@@ -55,6 +55,27 @@ class Router
         }
     }
 
+    public function createParameters(Request $request) {
+        echo "<pre>";
+        $uri = $request->getUri()->getPath();
+        $requestMethod = $request->getMethod();
+
+        if (array_key_exists($uri, $this->routes[$requestMethod])){
+            $entry = $this->routes[$requestMethod][$uri];
+            $refl = $entry[0];
+            $method = $entry[1];
+            $parameters = $refl->getMethod($method)->getParameters();
+
+            foreach ($parameters as $parameter) {
+                echo "Parameter name:&nbsp ".$parameter->getName()."<br>";
+                echo "Parameter type:&nbsp ".$parameter->getType()."<br>";
+                echo "Parameter type name:&nbsp ".$parameter->getType()->getName()."<br>";
+            }
+        }
+        echo "</pre>";
+
+    }
+
     public function register(string $requestMethod, string $route, callable|array $callable): self
     {
         $this->routes[$requestMethod][$route] = $callable;
@@ -123,11 +144,12 @@ class Router
         //Get the method routes
         $this->getRoute($controllers);
         echo "<pre>";
-        echo "Routes: <br>";
-        print_r($this->routes);
+        //echo "Routes: <br>";
+        //print_r($this->routes);
         echo "</pre>";
 
         //Make the parameters of the method
+        $this->createParameters($request);
 
         //Execute the method
 
