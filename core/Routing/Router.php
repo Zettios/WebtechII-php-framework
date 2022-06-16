@@ -5,6 +5,7 @@ namespace Webtek\Core\Routing;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use Webtek\Core\Http\Request;
+use Webtek\Core\Http\Response;
 
 class Router
 {
@@ -21,44 +22,24 @@ class Router
     {
         foreach ($controllers as $controller){
             $refl = new ReflectionClass($controller);
-//            echo "Controller name:&nbsp ".$refl->getName()."<br>";
-//            echo "---------------------------------------- <br>";
-            foreach ($refl->getMethods() as $method){
-
+            foreach ($refl->getMethods() as $method) {
                 if (!str_contains($method->getFileName(), "AbstractController")){
-//                    $customParameters = [];
-//                    echo "<br>Method name:&nbsp ".$method->getName()."<br>";
-//                    echo "Method class:&nbsp ".$method->getFileName()."<br>";
-
-//                    foreach ($method->getParameters() as $parameter) {
-//                        echo "Parameter name | type:&nbsp ".$parameter->getName()." | ".$parameter->getType()."<br>";
-//                        if (!$parameter->getType()->isBuiltin()) {
-//                            //echo "Parameter name:&nbsp ".$parameter->getName()."<br>";
-//                            //echo "Parameter type:&nbsp ".$parameter->getType()."<br>";
-//                            //echo "Parameter type name:&nbsp ".$parameter->getType()->getName()."<br>";
-//
-//                            //Get the class
-//                            $class = $this->container->get($parameter->getType()->getName());
-//                            $customParameters[$parameter->getName()] = $class;
-//                        }
-//                    }
-
                     $attributes = $method->getAttributes(Route::class);
                     foreach ($attributes as $attribute){
                         $route = $attribute->newInstance();
 
                         $this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName()]);
-                        //$this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName(), "parameters" => [$customParameters]]);
                     }
                 }
             }
         }
     }
 
-    public function createParameters(Request $request) {
-        echo "<pre>";
+    public function createParameters(Request $request): array|Response
+    {
         $uri = $request->getUri()->getPath();
         $requestMethod = $request->getMethod();
+        $methodParameters = [];
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
             $entry = $this->routes[$requestMethod][$uri];
@@ -67,13 +48,17 @@ class Router
             $parameters = $refl->getMethod($method)->getParameters();
 
             foreach ($parameters as $parameter) {
-                echo "Parameter name:&nbsp ".$parameter->getName()."<br>";
-                echo "Parameter type:&nbsp ".$parameter->getType()."<br>";
-                echo "Parameter type name:&nbsp ".$parameter->getType()->getName()."<br>";
+                if ($this->container->has($parameter->getType()->getName())) {
+                    $object = $this->container->get($parameter->getType()->getName());
+                    $methodParameters[$parameter->getName()] = $object;
+                } else {
+                    return new Response('1.1', 424, textBody: "Dependency '".$parameter->getName()."' not found");
+                }
             }
+        } else {
+            return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
         }
-        echo "</pre>";
-
+        return $methodParameters;
     }
 
     public function register(string $requestMethod, string $route, callable|array $callable): self
@@ -99,7 +84,7 @@ class Router
         return $args;
     }
 
-    public function getView(Request $request): ?array
+    public function getView(Request $request, array $methodParameters): array|Response
     {
 
         $uri = $request->getUri()->getPath();
@@ -109,25 +94,27 @@ class Router
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
             // If the url doesn't end with a "/"
-            return $this->callControllerFunction($requestMethod, $uri, $args);
+            return $this->callControllerFunction($requestMethod, $uri, $methodParameters);
         } else {
             // If the url ends with a "/" check for it.
             if (str_ends_with($uri, "/")) {
                 $uri = substr($uri, 0, -1);
                 if (array_key_exists($uri, $this->routes[$requestMethod])) {
-                    return $this->callControllerFunction($requestMethod, $uri, $args);
+                    return $this->callControllerFunction($requestMethod, $uri, $methodParameters);
                 } else {
-                    return null;
+                    return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
                 }
             } else {
-                return null;
+                return new Response('1.1', 404, textBody: "Path '".$uri."' not found");;
             }
         }
     }
 
-    public function callControllerFunction($requestMethod, $uri, $args): array
+    public function callControllerFunction($requestMethod, $uri, $parameters): array
     {
-        $body = call_user_func($this->routes[$requestMethod][$uri], $args);
+        $class = $this->container->get($this->routes[$requestMethod][$uri][0]->getName());
+        $method = $this->routes[$requestMethod][$uri][1];
+        $body = call_user_func_array(array($class, $method), $parameters);
 
         if (count($body[1]) !== 0) {
             foreach ($body[1] as $key => $value) {
@@ -137,22 +124,26 @@ class Router
         return array_merge(["webpage" => $body[0]], ["args" => $args]);
     }
 
-    public function resolve(Request $request)
+    public function resolve(Request $request): array|Response
     {
         $controllers = $this->container->registeredControllers;
+        if (count($controllers) === 0) {
+            return new Response('1.1', 404, textBody: "No existing controller.");
+        }
 
         //Get the method routes
         $this->getRoute($controllers);
-        echo "<pre>";
-        //echo "Routes: <br>";
-        //print_r($this->routes);
-        echo "</pre>";
+        if (count($this->routes) === 0) {
+            return new Response('1.1', 404, textBody: "Controllers have no methods to process.");
+        }
 
         //Make the parameters of the method
-        $this->createParameters($request);
+        $methodParameters = $this->createParameters($request);
+        if (is_a($methodParameters, Response::class)) {
+            return $methodParameters;
+        }
 
         //Execute the method
-
-        return $this->getView($request);
+        return $this->getView($request, $methodParameters);
     }
 }

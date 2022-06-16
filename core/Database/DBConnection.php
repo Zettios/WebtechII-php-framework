@@ -31,14 +31,6 @@ class DBConnection {
         }
     }
 
-    function test() {
-        $stmt = $this->getPdo()->query('SELECT name FROM user');
-        while ($row = $stmt->fetch())
-        {
-            echo $row['name'] . "\n";
-        }
-    }
-
     /**
      * @return mixed
      */

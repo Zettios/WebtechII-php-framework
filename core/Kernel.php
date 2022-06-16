@@ -20,6 +20,7 @@ class Kernel
 {
     private array $middlewares;
     private array $entities;
+    private array $controllers;
     private Container $container;
 
     public function __construct()
@@ -32,6 +33,9 @@ class Kernel
 
         // Retrieve entities
         $this->entities = require(dirname(__DIR__) . '/config/entities.php');
+
+        // Retrieve controllers
+        $this->controllers = require(dirname(__DIR__) . '/config/controllers.php');
 
         // Setting up container
         $container = $this->container = new Container();
@@ -78,8 +82,13 @@ class Kernel
             $di->register($entity);
         }
 
+        // Register controllers
+        foreach ($this->controllers as $controller) {
+            $di->register($controller);
+        }
 
-        // Registering all controllers
+
+        // Registering all controller paths
         $di->registerControllers();
 
         // Registering logger

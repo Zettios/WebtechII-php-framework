@@ -24,15 +24,17 @@ class RoutingMiddleware implements MiddlewareInterface
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        echo "<pre>";
         // Check if url route exists in router
         $responseText = $this->router->resolve($request);
 
-        if (!is_null($responseText)) {
-            $request = $request->withParsedBody($responseText);
-            $request = $request->withAttribute("state", 1);
-            return $handler->handle($request);
-        } else {
-            return new Response('1.1', 404, textBody: "Error");
+        if (is_a($responseText, Response::class)) {
+            return $responseText;
         }
+
+        $request = $request->withParsedBody($responseText);
+        $request = $request->withAttribute("state", 1);
+        echo "</pre>";
+        return $handler->handle($request);
     }
 }
