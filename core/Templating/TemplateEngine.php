@@ -72,20 +72,22 @@ class TemplateEngine
             $extend = $extend.$body[$firstPos];
             $firstPos++;
         }
+
         $fileToExtend = explode($needle,$extend);
-        return $this->getTemplates($body, $fileToExtend[1]);
+        $parent = $this->getTemplates($fileToExtend[1]);
+        return $parent;
     }
 
-    public function getTemplates(string $body, string $fileToFind, string $dir = "../template"): string
+    public function getTemplates(string $fileToFind, string $dir = "../template"): string
     {
         $foundFiles = array_slice(scandir($dir), 2);
         if (empty($foundFiles)){
-            return $body;
+            return "";
         } else {
             foreach ($foundFiles as $file) {
                 $path = $dir . "/" . $file;
                 if (is_dir($path)) {
-                    $content = $this->getTemplates($body, $fileToFind, $path);
+                    $content = $this->getTemplates($fileToFind, $path);
                     if ($content !== "") {
                         return $content;
                     }
@@ -96,7 +98,6 @@ class TemplateEngine
                 }
             }
         }
-
         return "";
     }
 

@@ -87,7 +87,6 @@ class Kernel
             $di->register($controller);
         }
 
-
         // Registering all controller paths
         $di->registerControllers();
 

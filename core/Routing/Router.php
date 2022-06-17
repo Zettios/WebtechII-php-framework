@@ -121,12 +121,21 @@ class Router
                 $args[$key] = $value;
             }
         }
-        return array_merge(["webpage" => $body[0]], ["args" => $args]);
+        if (isset($args)) {
+            return array_merge(["webpage" => $body[0]], ["args" => $args]);
+        } else {
+            return array_merge(["webpage" => $body[0]], []);
+        }
     }
 
     public function resolve(Request $request): array|Response
     {
         $controllers = $this->container->registeredControllers;
+        $path = "..".$request->getUri()->getPath();
+        if (file_exists($path) && is_file($path)) {
+            return new Response('1.1', 302, textBody: file_get_contents($path));
+        }
+
         if (count($controllers) === 0) {
             return new Response('1.1', 404, textBody: "No existing controller.");
         }

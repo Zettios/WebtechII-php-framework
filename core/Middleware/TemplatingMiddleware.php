@@ -26,14 +26,19 @@ class TemplatingMiddleware implements MiddlewareInterface
                 // === Block handling ===
                 $body["webpage"] = $this->templateEngine->processBlocks($body["webpage"], $parent);
             } else {
-                echo "<h1>Extend keyword does not exist. Blocks will not function</h1><br>";
+                new Response('1.1', 200, textBody: "<h1>Extend keyword does not exist. Blocks will not function</h1><br>");
             }
 
             // === Argument handling ==
-            $request = $request->withParsedBody(["body" => $this->templateEngine->processArguments($body["webpage"], $body["args"])]);
-            return new Response('1.1', 200, textBody: $request->getParsedBody()["body"]);
+            if (array_key_exists("args", $body)) {
+                $request = $request->withParsedBody(["body" => $this->templateEngine->processArguments($body["webpage"], $body["args"])]);
+                return new Response('1.1', 200, textBody: $request->getParsedBody()["body"]);
+            } else {
+                return new Response('1.1', 200, textBody: $body["webpage"]);
+            }
+
         }
 
-        return new Response('1.1', 200, textBody: "");;
+        return new Response('1.1', 200, textBody: "");
     }
 }

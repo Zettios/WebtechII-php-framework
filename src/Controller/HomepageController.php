@@ -18,24 +18,18 @@ class HomepageController extends AbstractController
 
         $title = "Awesome website!!";
         $name = $person['name'];
-        $footer = "© Copyright 2022 by a new footer!";
+        $footer = "© Copyright 2022 BitTraders";
 
-        return self::render("homepage.html", [  'title' => $title, 'footer' => $footer,
+        return self::render("login.html", [  'title' => $title, 'footer' => $footer,
                                                             'user_id' => $person['user_id'],
                                                             'name' => $name, 'email'=>$person['email'],
                                                             'password'=>$person['password'], 'role' => $person['role']]);
     }
 
-    #[Route(path: "/user", method: "POST")]
-    public static function user(User $user, array $args): array
+    #[Route(path: "/register", method: "GET")]
+    public static function user(): array
     {
 
-        //$user = HomepageController::class->getUser()->getAllUsers();
-
-        $title = "Awesome website!!";
-        $name = "Enrico";
-        $footer = "© Copyright 2022 by a new footer!";
-
-        return self::render("homepage.html", ['title' => $title, 'footer' => $footer, 'name' => $name]);
+        return self::render("register.html", []);
     }
 }

@@ -1,0 +1,25 @@
+extend(base.html)
+<br>
+blockstart(head)
+<title>Login - BitTraders</title>
+<link rel="stylesheet" href="styling/login/login.css">
+<script type="text/javascript" src="styling/login/login.js"></script>
+blockend(head)
+blockstart(body)
+<div id="login">
+  <form>
+    <h1 id="login-label">Registreer bij BitTraders</h1>
+    <label for="email" id="email-label">E-mail:</label>
+    <input type="email" id="email" name="email">
+    <label for="password" id="password-label">Password:</label>
+    <input type="password" id="password" name="password">
+    <input type="submit" value="Register" id="submit">
+    <a href="/">Inloggen?</a>
+  </form>
+</div>
+
+blockend(body)
+
+blockstart(footer)
+arg(footer)
+blockend(footer)
