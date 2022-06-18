@@ -1,0 +1,56 @@
+body {
+    background: grey;
+}
+
+#container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    top: 30vh;
+    position: relative;
+}
+
+#login-label {
+    text-align: center;
+}
+
+#login {
+    padding: 10px;
+    background: white;
+    min-width: 300px;
+    max-width: 300px;
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+form a {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+    text-decoration: none;
+}
+
+#password-label {
+    margin-top: 5px;
+}
+
+#submit {
+    margin-top: 20px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    text-align: center;
+    background: black;
+    color: white;
+}

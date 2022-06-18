@@ -31,7 +31,11 @@ class TemplatingMiddleware implements MiddlewareInterface
 
             // === Argument handling ==
             if (array_key_exists("args", $body)) {
-                $request = $request->withParsedBody(["body" => $this->templateEngine->processArguments($body["webpage"], $body["args"])]);
+
+                $body["webpage"] = $this->templateEngine->processArguments($body["webpage"], $body["args"]);
+                $body["webpage"] = $this->templateEngine->processForloops($body["webpage"], $body["args"]);
+
+                $request = $request->withParsedBody(["body" => $body["webpage"]]);
                 return new Response('1.1', 200, textBody: $request->getParsedBody()["body"]);
             } else {
                 return new Response('1.1', 200, textBody: $body["webpage"]);

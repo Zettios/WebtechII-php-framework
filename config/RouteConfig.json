@@ -2,13 +2,18 @@
   "routes": [
     {
       "path": "/",
-      "source": "../src/Controller",
-      "psr4": "App\\Controller"
+      "source": "../src/Controller/Homepage",
+      "psr4": "App\\Controller\\Homepage"
     },
     {
       "path": "/admin",
       "source": "../src/Controller/Admin",
       "psr4": "App\\Controller\\Admin"
+    },
+    {
+      "path": "/user",
+      "source": "../src/Controller/User",
+      "psr4": "App\\Controller\\User"
     }
   ]
 }

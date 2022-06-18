@@ -1,0 +1,23 @@
+extend(base-access.html)
+<br>
+blockstart(head)
+<title>User - BitTraders</title>
+<link rel="stylesheet" href="styling/userpage/userpage.css">
+<script type="text/javascript" src="styling/userpage/userpage.js"></script>
+blockend(head)
+blockstart(body)
+<h1>Gebruiker</h1>
+Naam: arg(name)<br>
+Email: arg(email)<br>
+Wachtwoord: arg(password)<br>
+
+<h1>Portemonnee</h1>
+forloopstart(wallet)
+<div>
+    <span>forarg(crypto_name)</span>: <span>forarg(amount)</span>
+</div>
+forloopend(wallet)
+blockend(body)
+
+blockstart(footer)
+blockend(footer)

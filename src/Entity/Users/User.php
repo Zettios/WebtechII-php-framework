@@ -83,12 +83,11 @@ class User extends DatabaseEntity
         return $this->role;
     }
 
-    /**
-     * @param mixed $role
-     */
-    public function setRole($role): void
+    public function getSpecificUser(int $id): array
     {
-        $this->role = $role;
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE user_id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 
     public function getAllUsers(): array

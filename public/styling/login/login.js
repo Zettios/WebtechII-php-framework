@@ -3,6 +3,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.querySelector('#submit').addEventListener('click', btn => {
         btn.preventDefault();
-        console.log('Pressed!');
+        document.location.href = '/user';
     });
 });

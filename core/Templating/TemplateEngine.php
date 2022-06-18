@@ -45,14 +45,14 @@ class TemplateEngine
 
         foreach ($blockNames as $key => $blockName) {
             if (str_contains($body, "blockstart(".$key.")") && str_contains($body, "blockend(".$key.")")) {
-                $blockNames[$key] = $this->get_string_between($body, "blockstart(".$key.")", "blockend(".$key.")");
+                $blockNames[$key] = $this->getSection($body, "blockstart(".$key.")", "blockend(".$key.")");
             }
         }
 
         return $blockNames;
     }
 
-    public function get_string_between($string, $start, $end): string
+    public function getSection($string, $start, $end): string
     {
         $startPos = strpos($string, $start);
         $content = "";
@@ -101,7 +101,7 @@ class TemplateEngine
         return "";
     }
 
-    public function processArguments(string $body, array $queryArgs): string
+    public function processArguments(string $body, array $functionArgs): string
     {
         $needle = "arg(";
         $lastPos = 0;
@@ -123,12 +123,105 @@ class TemplateEngine
             $args[$key[1]] = $arg.$body[$value++];
         }
 
+
         foreach (array_keys($args) as $arg) {
-            if(array_key_exists($arg, $queryArgs)) {
-                $body = str_replace($args[$arg], $queryArgs[$arg], $body);
+            if(array_key_exists($arg, $functionArgs)) {
+                $body = str_replace($args[$arg], $functionArgs[$arg], $body);
             }
         }
 
         return $body;
     }
+
+    public function processForloops(string $body, array $functionArgs): string
+    {
+        $needle = "forloopstart(";
+        $lastPos = 0;
+        $positions = array();
+        $loopNames = array();
+
+        while (($lastPos = strpos($body, $needle, $lastPos))!== false) {
+            $positions[] = $lastPos;
+            $lastPos = $lastPos + strlen($needle);
+        }
+
+        foreach ($positions as $value) {
+            $arg = "";
+            while ($body[$value] != ")") {
+                $arg = $arg.$body[$value];
+                $value++;
+            }
+            $key = explode($needle, $arg);
+            $loopNames[$key[1]] = "";
+        }
+
+        foreach ($loopNames as $key => $blockName) {
+            if (str_contains($body, "forloopstart(".$key.")") && str_contains($body, "forloopend(".$key.")")) {
+                $loopNames[$key] = $this->getSection($body, "forloopstart(".$key.")", "forloopend(".$key.")");
+            }
+        }
+
+        foreach (array_keys($functionArgs) as $functionArgKey) {
+            if (array_key_exists($functionArgKey, $loopNames)) {
+                $loopBody = $this->createLoopBody($functionArgKey, $functionArgs[$functionArgKey], $loopNames[$functionArgKey]);
+                //$loopNames[$functionArgKey] = $loopBody;
+                $body = str_replace($loopNames[$functionArgKey], $loopBody, $body);
+            }
+        }
+
+        return $body;
+    }
+
+    public function createLoopBody(string $key, array $values, string $loopBody): string
+    {
+        $valLength = sizeof($values);
+        $contentBase = $this->getStringBetween($loopBody, "forloopstart(".$key.")", "forloopend(".$key.")");
+        $forBody = "";
+
+
+        $needle = "forarg(";
+        $lastPos = 0;
+        $positions = array();
+        $args = array();
+
+        while (($lastPos = strpos($contentBase, $needle, $lastPos))!== false) {
+            $positions[] = $lastPos;
+            $lastPos = $lastPos + strlen($needle);
+        }
+
+        foreach ($positions as $value) {
+            $arg = "";
+            while ($contentBase[$value] != ")") {
+                $arg = $arg.$contentBase[$value];
+                $value++;
+            }
+            $key = explode($needle, $arg);
+            $args[$key[1]] = $arg.$contentBase[$value++];
+        }
+
+
+        for ($i = 0 ; $i < $valLength ; $i++) {
+            $tempBody = $contentBase;
+            foreach (array_keys($args) as $argKey) {
+                $tempBody = str_replace($args[$argKey], $values[$i][$argKey], $tempBody);
+            }
+
+            $tempBody = preg_replace('~[\r\n]+~', '', $tempBody);
+            $forBody .= $tempBody;
+        }
+
+        return $forBody;
+    }
+
+
+    public function getStringBetween($string, $start, $end): string
+    {
+        $string = ' ' . $string;
+        $ini = strpos($string, $start);
+        if ($ini == 0) return '';
+        $ini += strlen($start);
+        $len = strpos($string, $end, $ini) - $ini;
+        return substr($string, $ini, $len);
+    }
+
 }

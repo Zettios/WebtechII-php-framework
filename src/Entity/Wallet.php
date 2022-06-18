@@ -3,11 +3,18 @@
 namespace App\Entity;
 
 use Webtek\Core\Database\DatabaseEntity;
+use Webtek\Core\Database\DBConnection;
 
 class Wallet extends DatabaseEntity
 {
     private int $wallet_id;
     private int $user_id;
+    private DBConnection $db;
+
+    public function __construct(DBConnection $db)
+    {
+        $this->db = $db;
+    }
 
     /**
      * @return mixed
@@ -18,14 +25,6 @@ class Wallet extends DatabaseEntity
     }
 
     /**
-     * @param mixed $wallet_id
-     */
-    public function setWalletId($wallet_id): void
-    {
-        $this->wallet_id = $wallet_id;
-    }
-
-    /**
      * @return mixed
      */
     public function getUserId(): int
@@ -33,11 +32,11 @@ class Wallet extends DatabaseEntity
         return $this->user_id;
     }
 
-    /**
-     * @param mixed $user_id
-     */
-    public function setUserId($user_id): void
+
+    public function getSpecificWallet(int $id): array
     {
-        $this->user_id = $user_id;
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM wallet WHERE user_id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetch();
     }
 }
