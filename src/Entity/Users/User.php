@@ -97,6 +97,19 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function loginUser(string $username, string $password): array
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
+        $stmt->execute([$username]);
+        $results = $stmt->fetch();
+
+        if (password_verify($password, $results["password"])) {
+            return ["status" => 200, "id" => $results["user_id"]];
+        } else {
+            return ["status" => 404];
+        }
+    }
+
     public function registerUser(string $username, string $email, string $password): void
     {
         $stmt = $this->db->getPdo()->prepare("INSERT INTO user (name, email, password, role) VALUES (?,?,?,?)");
