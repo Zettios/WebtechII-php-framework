@@ -96,4 +96,10 @@ class User extends DatabaseEntity
         $stmt->execute(["Enrico"]);
         return $stmt->fetch();
     }
+
+    public function registerUser(string $username, string $email, string $password): void
+    {
+        $stmt = $this->db->getPdo()->prepare("INSERT INTO user (name, email, password, role) VALUES (?,?,?,?)");
+        $stmt->execute([$username, $email, $password, 1]);
+    }
 }

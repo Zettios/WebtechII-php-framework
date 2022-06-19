@@ -47,6 +47,7 @@ class Kernel
             $mainHandler->add($container->get($middleware));
         }
         $response = $mainHandler->handle($container->get(ServerRequest::class));
+
         // Writing response
         $this->writeToOutput($response);
     }

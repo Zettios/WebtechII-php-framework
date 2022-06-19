@@ -180,12 +180,13 @@ class Request implements RequestInterface
     {
         $new = clone $this;
         if ($preserveHost) {
-            if ($this->uri->getHost() === null){
+            if ($this->uri->getHost() !== null){
                 if (!$uri->getHost() === null) {
-                    $new->uri->withHost($uri->getHost());
+
                 }
             }
         }
+        $new->uri = $uri;
         return $new;
     }
 

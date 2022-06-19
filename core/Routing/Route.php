@@ -6,7 +6,7 @@ namespace Webtek\Core\Routing;
 class Route
 {
 
-    public function __construct(private string $path, private string $method, private ?string $name = null) {}
+    public function __construct(private string $path, private string $method, private ?string $slugName = "") {}
 
     /**
      * @return string
@@ -43,16 +43,16 @@ class Route
     /**
      * @return string
      */
-    public function getName(): string
+    public function getSlugName(): string
     {
-        return $this->name;
+        return $this->slugName;
     }
 
     /**
-     * @param string $name
+     * @param string $slugName
      */
-    public function setName(string $name): void
+    public function setSlugName(string $slugName): void
     {
-        $this->name = $name;
+        $this->slugName = $slugName;
     }
 }

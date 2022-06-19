@@ -21,4 +21,16 @@ class UserController extends AbstractController
         return self::render("userpage.html", ['name' => $currentUser['name'], 'email'=>$currentUser['email'],
                                                            'password'=>$currentUser['password'], 'wallet'=>$usersCrypto]);
     }
+
+    #[Route(path: "/user/{id}", method: "GET", slugName: "id")]
+    public function userAccountPage(User $user, Wallet $wallet, CryptoInWallet $cryptoInWallet, string $id): array
+    {
+        $currentUser = $user->getSpecificUser($id);
+        $usersWallet = $wallet->getSpecificWallet($currentUser["user_id"]);
+        $usersCrypto = $cryptoInWallet->getUsersCrypto($usersWallet["wallet_id"]);
+
+
+        return self::render("userpage.html", ['name' => $currentUser['name'], 'email'=>$currentUser['email'],
+            'password'=>$currentUser['password'], 'wallet'=>$usersCrypto]);
+    }
 }

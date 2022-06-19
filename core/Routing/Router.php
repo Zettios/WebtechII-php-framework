@@ -27,8 +27,7 @@ class Router
                     $attributes = $method->getAttributes(Route::class);
                     foreach ($attributes as $attribute){
                         $route = $attribute->newInstance();
-
-                        $this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName()]);
+                        $this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName(), $route->getSlugName()]);
                     }
                 }
             }
@@ -56,9 +55,51 @@ class Router
                 }
             }
         } else {
-            return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
+            $routeToUse = $this->checkSlugLinks($uri, $requestMethod, $this->routes);
+            if (count($routeToUse) === 0) {
+                return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
+            }
+            $routeInfo = $this->routes[$requestMethod][$routeToUse['route']];
+            $refl = $routeInfo[0];
+            $method = $routeInfo[1];
+            $parameters = $refl->getMethod($method)->getParameters();
+            foreach ($parameters as $parameter) {
+                if ($this->container->has($parameter->getType()->getName())) {
+                    $object = $this->container->get($parameter->getType()->getName());
+                    $methodParameters[$parameter->getName()] = $object;
+                } else {
+                    if (array_key_exists($parameter->getName(), $routeToUse)) {
+
+                        $methodParameters[$parameter->getName()] = $routeToUse[$parameter->getName()];
+                    } else {
+                        return new Response('1.1', 424, textBody: "Dependency '".$parameter->getName()."' not found");
+                    }
+                }
+            }
+            //return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
         }
         return $methodParameters;
+    }
+
+    public function checkSlugLinks(string $uri, string $method, array $routes): array
+    {
+        foreach (array_keys($routes[$method]) as $route) {
+            if (str_contains($route, "{") && str_contains($route, "}")) {
+                $splitRoute = explode("/", $route);
+                $splitUri = explode("/", $uri);
+                $slug = end($splitRoute);
+                $slugValue = end($splitUri);
+                $sluglessUri = substr($uri,0,strrpos($uri,'/'))."/";
+                $sluglessRoute = substr($route,0,strrpos($route,'/'))."/";
+                $slugIdentifier = $routes[$method][$route][2];
+
+                if (!empty($slugIdentifier) && str_contains($slug, $slugIdentifier) && $sluglessUri === $sluglessRoute) {
+                    return ['route' => $route, trim($slug, "{}") => $slugValue];
+                }
+            }
+        }
+
+        return [];
     }
 
     public function register(string $requestMethod, string $route, callable|array $callable): self
@@ -86,7 +127,6 @@ class Router
 
     public function getView(Request $request, array $methodParameters): array|Response
     {
-
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
         $args = $this->createArguments($query);
@@ -105,16 +145,29 @@ class Router
                     return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
                 }
             } else {
-                return new Response('1.1', 404, textBody: "Path '".$uri."' not found");;
+                $routeToUse = $this->checkSlugLinks($uri, $requestMethod, $this->routes);
+                if (count($routeToUse) === 0) {
+                    return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
+                } else {
+                    $newUri = $request->getUri()->withPath($routeToUse['route']);
+                    $request = $request->withUri($newUri, true);
+                    return $this->getView($request, $methodParameters);
+                }
+
+                //return new Response('1.1', 404, textBody: "Path '".$uri."' not found");;
             }
         }
     }
 
-    public function callControllerFunction($requestMethod, $uri, $parameters): array
+    public function callControllerFunction(string $requestMethod, string $uri, array $parameters): array|Response
     {
         $class = $this->container->get($this->routes[$requestMethod][$uri][0]->getName());
         $method = $this->routes[$requestMethod][$uri][1];
         $body = call_user_func_array(array($class, $method), $parameters);
+
+        if (is_a($body, Response::class)) {
+            return $body;
+        }
 
         if (count($body[1]) !== 0) {
             foreach ($body[1] as $key => $value) {

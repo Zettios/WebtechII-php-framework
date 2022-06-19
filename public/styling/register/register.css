@@ -37,7 +37,7 @@ form a {
     text-decoration: none;
 }
 
-#password-label {
+#username-label, #password-label {
     margin-top: 5px;
 }
 
