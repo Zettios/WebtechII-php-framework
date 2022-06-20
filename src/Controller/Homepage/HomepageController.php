@@ -34,13 +34,13 @@ class HomepageController extends AbstractController
         $username = $params["username"];
         $password = $params["password"];
 
-        //$password = password_hash($password,PASSWORD_BCRYPT );
-
-        $statusCode = $user->loginUser($username, $password);
-        if ($statusCode["status"] === 200) {
-            return new Response('1.1', $statusCode["status"], textBody: '{"status":"'.$statusCode["status"].'","message": "Success", "id": "'.$statusCode["id"].'"}');
+        $response = $user->loginUser($username, $password);
+        if ($response["status"] === 200) {
+            setcookie('id', $response["id"]);
+            setcookie('role', $response["role"]);
+            return new Response('1.1', $response["status"], textBody: '{"status":'.$response["status"].',"message": "Success", "id": '.$response["id"].'}');
         } else {
-            return new Response('1.1', $statusCode["status"], textBody:  '{"status":"'.$statusCode["status"].'","message": "User not found"}');
+            return new Response('1.1', $response["status"], textBody:  '{"status":'.$response["status"].',"message": "User not found"}');
         }
     }
 
@@ -52,10 +52,14 @@ class HomepageController extends AbstractController
         $username = $params["username"];
         $password = $params["password"];
 
-        $password = password_hash($password,PASSWORD_BCRYPT );
+        $password = password_hash($password,PASSWORD_BCRYPT);
 
-        $user->registerUser($username, $email, $password);
+        $statusCode = $user->registerUser($username, $email, $password);
 
-        return new Response('1.1', 200, textBody: '{"200": "Success"}');
+        if ($statusCode["status"] === 201) {
+            return new Response('1.1', $statusCode["status"], textBody: '{"status":'.$statusCode["status"].',"message": "Account created"}');
+        } else {
+            return new Response('1.1', $statusCode["status"], textBody:  '{"status":'.$statusCode["status"].',"message": "Username already exists"}');
+        }
     }
 }

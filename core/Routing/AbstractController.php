@@ -24,8 +24,13 @@ abstract class AbstractController
                         return $template;
                     }
                 } else {
-                    if (str_ends_with($template, ".html")) {
+                    if (str_ends_with($template, ".html") || str_ends_with($template, ".php")) {
                         if ($template === $templateToFind){
+//                            ob_start();
+//                            include $path;
+//                            return ob_get_clean();
+
+
                             return file_get_contents($path);
                         }
                     }

@@ -47,7 +47,15 @@ class ServerRequest extends Request implements ServerRequestInterface
 
         // Leaving the body null for now
         $body = null;
-        return new self($method, $uri, $protocolVersion, $headers, $body, $requestTarget, $_SERVER, $_COOKIE, $_GET, $_FILES, $_POST);
+
+        $session = [];
+        if(isset($_SESSION)) {
+            $session = $_SESSION;
+            echo "Session:";
+            print_r($session);
+        }
+
+        return new self($method, $uri, $protocolVersion, $headers, $body, $requestTarget, $_SERVER, $_COOKIE, $_GET, $_FILES, $_POST, sessionParams: $session);
     }
 
     /**
@@ -63,6 +71,26 @@ class ServerRequest extends Request implements ServerRequestInterface
     {
         return $this->serverParams;
     }
+
+//    public function setServerParams(string $key, mixed $value): self
+//    {
+//        $new = clone $this;
+//        $new->serverParams[$key] = $value;
+//        return $new;
+//    }
+
+    public function getSessionParams(): array
+    {
+        return $this->sessionParams;
+    }
+
+    public function setSessionParams(string $key, mixed $value): self
+    {
+        $new = clone $this;
+        $new->sessionParams[$key] = $value;
+        return $new;
+    }
+
 
     /**
      * Retrieve cookies.

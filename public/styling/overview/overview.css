@@ -1,0 +1,17 @@
+#title {
+    text-align: center;
+}
+
+.cryptobar {
+    background: black;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.cryptobar:nth-of-type(even) {
+    background: #373737;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+}

@@ -10,6 +10,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: 'POST',
             })
             //.then( resp => resp.json() )
-            .then( resp => console.log(resp) )
+            .then( resp => resp.json() )
+            .then( data => {
+                if (data['status'] === 201) {
+                    alert("Account created!")
+                } else {
+                    alert("Username already in use!");
+                }
+            })
     });
 });

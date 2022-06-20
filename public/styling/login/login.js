@@ -8,11 +8,12 @@ document.addEventListener("DOMContentLoaded", function() {
             {
                 method: 'GET',
             })
-            //.then( resp => resp.json() )
             .then( resp => resp.json() )
             .then( data => {
                 if (data['status'] === 200) {
-                    document.location.href = '/user';
+                    document.location.href = '/crypto';
+                } else {
+                    alert("Gebruikersnaam of wachtwoord is incorrect.");
                 }
             })
     });

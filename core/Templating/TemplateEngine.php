@@ -93,6 +93,12 @@ class TemplateEngine
                     }
                 } else {
                     if ($file === $fileToFind) {
+//                        ob_start();
+//                        include $path;
+//                        return ob_get_clean();
+
+                        //echo ;
+                        //return include $path;
                         return file_get_contents($path);
                     }
                 }
