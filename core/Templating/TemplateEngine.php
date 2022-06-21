@@ -97,8 +97,6 @@ class TemplateEngine
 //                        include $path;
 //                        return ob_get_clean();
 
-                        //echo ;
-                        //return include $path;
                         return file_get_contents($path);
                     }
                 }
@@ -217,6 +215,45 @@ class TemplateEngine
         }
 
         return $forBody;
+    }
+
+    public function processCompare(string $body, array $functionArgs): string
+    {
+        $needle = "compare(";
+        $lastPos = 0;
+        $positions = array();
+        $compares = array();
+
+        while (($lastPos = strpos($body, $needle, $lastPos))!== false) {
+            $positions[] = $lastPos;
+            $lastPos = $lastPos + strlen($needle);
+        }
+
+        foreach ($positions as $value) {
+            $arg = "";
+            while ($body[$value] != ")") {
+                $arg = $arg.$body[$value];
+                $value++;
+            }
+            $key = explode($needle, $arg);
+            $compares[$key[1]] = "";
+        }
+
+        foreach (array_keys($compares) as $compare) {
+            $splitCompare = explode("//", $compare);
+            $splitCompare = array_map('trim', $splitCompare);
+            if (count($splitCompare)  >= 4) {
+                if ($splitCompare[0] === $splitCompare[1]) {
+                    $value = $needle.$compare.")";
+                    $body = str_replace($value, $splitCompare[2], $body);
+                } else {
+                    $value = $needle.$compare.")";
+                    $body = str_replace($value, $splitCompare[3], $body);
+                }
+            }
+        }
+
+        return $body;
     }
 
 

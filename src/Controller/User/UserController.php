@@ -31,6 +31,6 @@ class UserController extends AbstractController
 
 
         return self::render("userpage.html", ['name' => $currentUser['name'], 'email'=>$currentUser['email'],
-            'password'=>$currentUser['password'], 'wallet'=>$usersCrypto]);
+            'password'=>$currentUser['password'], 'role' => $currentUser['role'], 'wallet'=>$usersCrypto]);
     }
 }

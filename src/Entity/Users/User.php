@@ -124,6 +124,19 @@ class User extends DatabaseEntity
         } else {
             $stmt = $this->db->getPdo()->prepare("INSERT INTO user (name, email, password, role) VALUES (?,?,?,?)");
             $stmt->execute([$username, $email, $password, 1]);
+
+            $id = $this->db->getPdo()->lastInsertId();
+            echo $id;
+
+            $stmt = $this->db->getPdo()->prepare("INSERT INTO wallet (user_id) VALUES (?)");
+            $stmt->execute([$id]);
+
+            $id = $this->db->getPdo()->lastInsertId();
+            echo $id;
+
+            $stmt = $this->db->getPdo()->prepare("INSERT INTO crypto_in_wallet (wallet_id, crypto_id, amount) VALUES (?, ?, ?)");
+            $stmt->execute([$id, 1, 0.0]);
+
             return ["status" => 201];
         }
     }

@@ -30,7 +30,6 @@ abstract class AbstractController
 //                            include $path;
 //                            return ob_get_clean();
 
-
                             return file_get_contents($path);
                         }
                     }

@@ -21,6 +21,6 @@ class CryptoController extends AbstractController
 
         $cookies = $request->getCookieParams();
 
-        return self::render("overview.php", ['crypto' => $allCrypto, 'role' => $cookies['role']]);
+        return self::render("overview.html", ['crypto' => $allCrypto, 'id' => $cookies['id'], 'role' => $cookies['role']]);
     }
 }
