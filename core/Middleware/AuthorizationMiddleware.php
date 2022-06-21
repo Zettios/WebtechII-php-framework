@@ -27,7 +27,6 @@ class AuthorizationMiddleware implements MiddlewareInterface
         $attr = $request->getAttributes();
 
         $accessLevel =  intval($attr['access']);
-        $userAccess =  intval($cookies['accessRole']);
 
 //        echo "<pre>";
 //        var_dump($accessLevel)."<br>";
@@ -37,6 +36,10 @@ class AuthorizationMiddleware implements MiddlewareInterface
         if ($accessLevel === -1) {
             return $handler->handle($request);
         } else {
+            if (!isset($cookies['accessRole'])) {
+                return new Response('1.1', 403, textBody: "Not authorized.");
+            }
+            $userAccess =  intval($cookies['accessRole']);
             if ($accessLevel <= $userAccess) {
                 return $handler->handle($request);
             } else {
