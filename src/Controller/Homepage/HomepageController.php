@@ -37,7 +37,7 @@ class HomepageController extends AbstractController
         $response = $user->loginUser($username, $password);
         if ($response["status"] === 200) {
             setcookie('id', $response["id"]);
-            setcookie('role', $response["role"]);
+            setcookie('accessRole', $response["role"]);
             return new Response('1.1', $response["status"], textBody: '{"status":'.$response["status"].',"message": "Success", "id": '.$response["id"].'}');
         } else {
             return new Response('1.1', $response["status"], textBody:  '{"status":'.$response["status"].',"message": "User not found"}');

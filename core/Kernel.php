@@ -5,6 +5,7 @@ namespace Webtek\Core;
 use App\Entity\Users\User;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
+use Webtek\Core\Auth\Auth;
 use Webtek\Core\Database\DBConnection;
 use Webtek\Core\DependencyInjection\Container;
 use Webtek\Core\Http\Response;
@@ -70,6 +71,7 @@ class Kernel
         $di->register(Router::class);
         $di->register(Route::class);
         $di->register(TemplateEngine::class);
+        $di->register(Auth::class);
 
         $di->register(DBConnection::class);
 

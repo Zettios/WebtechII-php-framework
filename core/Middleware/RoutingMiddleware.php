@@ -33,7 +33,7 @@ class RoutingMiddleware implements MiddlewareInterface
         }
 
         $request = $request->withParsedBody($responseText);
-        $request = $request->withAttribute("state", 1);
+        $request = $request->withAttribute("access", $responseText['access']);
         return $handler->handle($request);
     }
 }

@@ -27,7 +27,7 @@ class Router
                     $attributes = $method->getAttributes(Route::class);
                     foreach ($attributes as $attribute){
                         $route = $attribute->newInstance();
-                        $this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName(), $route->getSlugName()]);
+                        $this->register($route->getMethod(), $route->getPath(), [$refl, $method->getName(), $route->getSlugName(), $route->getAccessLevel()]);
                     }
                 }
             }
@@ -175,9 +175,9 @@ class Router
             }
         }
         if (isset($args)) {
-            return array_merge(["webpage" => $body[0]], ["args" => $args]);
+            return array_merge(["webpage" => $body[0]], ["args" => $args], ["access" => $this->routes[$requestMethod][$uri][3]]);
         } else {
-            return array_merge(["webpage" => $body[0]], []);
+            return array_merge(["webpage" => $body[0]], [], ["access" => $this->routes[$requestMethod][$uri][3]]);
         }
     }
 
@@ -199,11 +199,17 @@ class Router
             return new Response('1.1', 404, textBody: "Controllers have no methods to process.");
         }
 
+
         //Make the parameters of the method
         $methodParameters = $this->createParameters($request);
         if (is_a($methodParameters, Response::class)) {
             return $methodParameters;
         }
+
+//        echo "<pre>";
+//        print_r($this->routes);
+//        echo "</pre>";
+
 
         //Execute the method
         return $this->getView($request, $methodParameters);

@@ -6,7 +6,7 @@ namespace Webtek\Core\Routing;
 class Route
 {
 
-    public function __construct(private string $path, private string $method, private ?string $slugName = "") {}
+    public function __construct(private string $path, private string $method, private ?string $slugName = "", private string $accessLevel = "-1") {}
 
     /**
      * @return string
@@ -54,5 +54,21 @@ class Route
     public function setSlugName(string $slugName): void
     {
         $this->slugName = $slugName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccessLevel(): string
+    {
+        return $this->accessLevel;
+    }
+
+    /**
+     * @param string $accessLevel
+     */
+    public function setAccessLevel(string $accessLevel): void
+    {
+        $this->accessLevel = $accessLevel;
     }
 }
