@@ -49,7 +49,7 @@ class CryptoController extends AbstractController
                                                       'yourAmount' => $currentUserWallet['amount']]);
     }
 
-    #[Route(path: "/boughtCrypto", method: "PUT")]
+    #[Route(path: "/boughtCrypto", method: "PUT", accessLevel: "1")]
     public static function boughtCrypto(ServerRequest $request, User $user, Crypto $crypto): Response
     {
         $params = $request->getQueryParams();
@@ -96,7 +96,7 @@ class CryptoController extends AbstractController
                                                       'yourAmount' => $currentUserWallet['amount']]);
     }
 
-    #[Route(path: "/soldCrypto", method: "PUT")]
+    #[Route(path: "/soldCrypto", method: "PUT", accessLevel: "1")]
     public static function soldCrypto(ServerRequest $request, User $user, Crypto $crypto): Response
     {
         $params = $request->getQueryParams();

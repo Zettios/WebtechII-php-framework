@@ -90,6 +90,20 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function checkUsername(string $username): array|bool
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
+        $stmt->execute([$username]);
+        return $stmt->fetch();
+    }
+
+    public function updateUser(int $id, string $username, string $email, string $password): array|bool
+    {
+        $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, password = ? WHERE user_id = ?');
+        $stmt->execute([$username, $email, $password, $id]);
+        return $stmt->fetch();
+    }
+
     public function getWallet(int $id, int $crypto_id): array
     {
         $stmt = $this->db->getPdo()->prepare('SELECT w.wallet_id, c.crypto_id, c.amount FROM user AS u, wallet AS w, crypto_in_wallet AS c 
