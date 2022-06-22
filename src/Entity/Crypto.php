@@ -55,4 +55,24 @@ class Crypto extends DatabaseEntity
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    public function getSingleCrypto(int $id): array
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM crypto AS c, course_price AS cp
+                                              WHERE cp.crypto_id = c.crypto_id AND c.crypto_id = ?');
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    public function updateCryptoValue(int $crypto_id, float $newAmount): void
+    {
+        $stmt = $this->db->getPdo()->prepare('UPDATE course_price SET value = ? WHERE crypto_id = ?');
+        $stmt->execute([$newAmount, $crypto_id]);
+    }
+
+    public function updateWallet(int $wallet_id, int $crypto_id, float $newAmount): void
+    {
+        $stmt = $this->db->getPdo()->prepare('UPDATE crypto_in_wallet SET amount = ? WHERE wallet_id = ? AND crypto_id = ?');
+        $stmt->execute([$newAmount, $wallet_id, $crypto_id]);
+    }
 }

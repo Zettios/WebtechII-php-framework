@@ -1,0 +1,16 @@
+extend(base-access.html)
+<br>
+blockstart(head)
+<title>User - BitTraders</title>
+<link rel="stylesheet" href="/styling/crypto/general.css">
+<script type="text/javascript" src="/styling/crypto/sell.js"></script>
+blockend(head)
+blockstart(body)
+<h1 id="title">Sell arg(crypto_name)</h1>
+Current value of arg(crypto_name): arg(crypto_value)<br>
+Amount to buy: <input id="amountToSell" value="0.00000"><button id="sellButton">Sell</button><br>
+Your current amount in wallet: arg(yourAmount)
+blockend(body)
+
+blockstart(footer)
+blockend(footer)

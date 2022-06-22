@@ -25,7 +25,7 @@ class UserController extends AbstractController
     #[Route(path: "/user/{id}", method: "GET", slugName: "id", accessLevel: "1")]
     public function userAccountPage(User $user, Wallet $wallet, CryptoInWallet $cryptoInWallet, string $id): array
     {
-        $currentUser = $user->getSpecificUser($id);
+        $currentUser = $user->getSpecificUser(intval($id));
         $usersWallet = $wallet->getSpecificWallet($currentUser["user_id"]);
         $usersCrypto = $cryptoInWallet->getUsersCrypto($usersWallet["wallet_id"]);
 

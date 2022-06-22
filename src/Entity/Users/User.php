@@ -90,6 +90,21 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function getWallet(int $id, int $crypto_id): array
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT w.wallet_id, c.crypto_id, c.amount FROM user AS u, wallet AS w, crypto_in_wallet AS c 
+                                                WHERE u.user_id = ? AND c.crypto_id = ? AND u.user_id = w.user_id AND w.wallet_id = c.wallet_id');
+        $stmt->execute([$id, $crypto_id]);
+
+        $result = $stmt->fetch();
+
+        if (is_bool($result)) {
+            $result = [];
+        }
+
+        return $result;
+    }
+
     public function getAllUsers(): array
     {
         $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
