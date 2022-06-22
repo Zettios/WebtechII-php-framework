@@ -28,9 +28,20 @@ class UserController extends AbstractController
     public function editUserPage(User $user, string $id): array
     {
         $currentUser = $user->getSpecificUser(intval($id));
+        $foundNoneCryptos = $user->getNoneCryptoWallets($currentUser['user_id']);
+
+        if (is_bool($foundNoneCryptos)){
+            $foundNoneCryptos = [];
+        }
+
+        for ($i = 0; $i < count($foundNoneCryptos); $i++) {
+            $foundNoneCryptos[$i]['crypto_name'] = $foundNoneCryptos[$i]['name'];
+            unset($foundNoneCryptos[$i]['name']);
+        }
+
 
         return self::render("edit.html", ['id' => $currentUser["user_id"], 'name' => $currentUser['name'], 'email'=>$currentUser['email'],
-            'password'=>$currentUser['password'], 'role' => $currentUser['role']]);
+            'password'=>$currentUser['password'], 'role' => $currentUser['role'], 'wallet' => $foundNoneCryptos]);
     }
 
     #[Route(path: "/updateUser", method: "PUT", accessLevel: "1")]

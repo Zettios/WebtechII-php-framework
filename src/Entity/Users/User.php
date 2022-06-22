@@ -119,6 +119,20 @@ class User extends DatabaseEntity
         return $result;
     }
 
+    public function getNoneCryptoWallets(int $id): array|bool
+    {
+        $stmt = $this->db->getPdo()->prepare('  SELECT c.name
+                                                FROM crypto as c
+                                                WHERE NOT EXISTS (	SELECT cu.name
+					                            FROM db_bit_traders.user AS u, wallet AS w, crypto_in_wallet AS cw, crypto as cu
+					                            WHERE u.user_id = ? 
+					                              AND u.user_id = w.user_id AND w.wallet_id = cw.wallet_id 
+					                              AND cw.crypto_id = cu.crypto_id AND c.crypto_id = cu.crypto_id);');
+        $stmt->execute([$id]);
+
+        return $stmt->fetchAll();
+    }
+
     public function getAllUsers(): array
     {
         $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
