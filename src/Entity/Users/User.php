@@ -97,10 +97,37 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function checkUsernameAdmin(int $id, string $username): bool
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
+        $stmt->execute([$username]);
+        $result1 = $stmt->fetch();
+
+        if (is_bool($result1) || $result1['user_id'] === $id) {
+            return true;
+        }
+
+        return false;
+    }
+
     public function updateUser(int $id, string $username, string $email, string $password): array|bool
     {
         $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, password = ? WHERE user_id = ?');
         $stmt->execute([$username, $email, $password, $id]);
+        return $stmt->fetch();
+    }
+
+    public function updateUserAdmin(int $id, string $username, string $email, string $password, int $role): array|bool
+    {
+        if (empty($password)) {
+            $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, role = ? WHERE user_id = ?');
+            $stmt->execute([$username, $email, $role, $id]);
+        } else {
+            $password = password_hash($password,PASSWORD_BCRYPT);
+            $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, password = ?, role = ? WHERE user_id = ?');
+            $stmt->execute([$username, $email, $password, $role, $id]);
+        }
+
         return $stmt->fetch();
     }
 
@@ -189,13 +216,11 @@ class User extends DatabaseEntity
             $stmt->execute([$username, $email, $password, 1]);
 
             $id = $this->db->getPdo()->lastInsertId();
-            echo $id;
 
             $stmt = $this->db->getPdo()->prepare("INSERT INTO wallet (user_id) VALUES (?)");
             $stmt->execute([$id]);
 
             $id = $this->db->getPdo()->lastInsertId();
-            echo $id;
 
             $stmt = $this->db->getPdo()->prepare("INSERT INTO crypto_in_wallet (wallet_id, crypto_id, amount) VALUES (?, ?, ?)");
             $stmt->execute([$id, 1, 0.0]);

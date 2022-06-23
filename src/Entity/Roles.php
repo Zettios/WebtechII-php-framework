@@ -3,11 +3,18 @@
 namespace App\Entity;
 
 use Webtek\Core\Database\DatabaseEntity;
+use Webtek\Core\Database\DBConnection;
 
 class Roles extends DatabaseEntity
 {
     private int $role_id;
     private string $role_name;
+    private DBConnection $db;
+
+    public function __construct(DBConnection $db)
+    {
+        $this->db = $db;
+    }
 
     /**
      * @return int
@@ -39,5 +46,12 @@ class Roles extends DatabaseEntity
     public function setRoleName(string $role_name): void
     {
         $this->role_name = $role_name;
+    }
+
+    public function getAllRoles()
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT role_id FROM roles');
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

@@ -168,7 +168,6 @@ class TemplateEngine
         foreach (array_keys($functionArgs) as $functionArgKey) {
             if (array_key_exists($functionArgKey, $loopNames)) {
                 $loopBody = $this->createLoopBody($functionArgKey, $functionArgs[$functionArgKey], $loopNames[$functionArgKey]);
-                //$loopNames[$functionArgKey] = $loopBody;
                 $body = str_replace($loopNames[$functionArgKey], $loopBody, $body);
             }
         }
@@ -181,7 +180,6 @@ class TemplateEngine
         $valLength = sizeof($values);
         $contentBase = $this->getStringBetween($loopBody, "forloopstart(".$key.")", "forloopend(".$key.")");
         $forBody = "";
-
 
         $needle = "argfor(";
         $lastPos = 0;
@@ -202,18 +200,17 @@ class TemplateEngine
             $key = explode($needle, $arg);
             $args[$key[1]] = $arg.$contentBase[$value++];
         }
-
-
         for ($i = 0 ; $i < $valLength ; $i++) {
             $tempBody = $contentBase;
             foreach (array_keys($args) as $argKey) {
-                $tempBody = str_replace($args[$argKey], $values[$i][$argKey], $tempBody);
+                if (key_exists($argKey, $values[$i])) {
+                    $tempBody = str_replace($args[$argKey], $values[$i][$argKey], $tempBody);
+                }
             }
 
             $tempBody = preg_replace('~[\r\n]+~', '', $tempBody);
             $forBody .= $tempBody;
         }
-
         return $forBody;
     }
 

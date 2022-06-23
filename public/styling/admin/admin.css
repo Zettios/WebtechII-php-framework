@@ -1,0 +1,21 @@
+.userbar {
+    background: black;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.userbar:nth-of-type(even) {
+    background: #373737;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.editfield {
+    background: grey;
+    padding: 10px;
+    margin-bottom: 5px;
+    //visibility: hidden;
+    //height: 0px;
+}

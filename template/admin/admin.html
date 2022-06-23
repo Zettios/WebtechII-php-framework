@@ -9,7 +9,17 @@ blockstart(body)
 <h1 id="title">Users</h1>
 forloopstart(users)
 <div class="userbar">
-    <span>argfor(user_id)</span> | <span>argfor(name)</span> | <span>argfor(email)</span> | <span>argfor(password)</span> | <span>argfor(role)</span>
+    <span>argfor(user_id)</span> | <span>argfor(name)</span> |
+    <span>argfor(email)</span> | <span>argfor(password)</span>
+    | <span>argfor(role)</span>
+</div>
+<div class="editfield">
+    <span class="id">argfor(user_id)</span>
+    <input class="name" type="text" value="argfor(name)">
+    <input class="email" type="text" value="argfor(email)">
+    <input class="password" type="text" value="">
+    <input class="role" type="text" value="argfor(role)">
+    <button class="save">Save</button>
 </div>
 forloopend(users)
 blockend(body)
