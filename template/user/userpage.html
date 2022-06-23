@@ -10,8 +10,6 @@ blockstart(body)
 Naam: arg(name)<br>
 Email: arg(email)<br>
 Wachtwoord: arg(password)<br>
-<input type="button" onclick="location.href='/user/edit/arg(id)';" value="Edit" />
-
 
 <h1>Portemonnee</h1>
 forloopstart(wallet)
@@ -19,6 +17,9 @@ forloopstart(wallet)
     <span>forarg(crypto_name)</span>: <span>forarg(amount)</span>
 </div>
 forloopend(wallet)
+
+
+<br><br><hr><input id="edit" type="button" onclick="location.href='/user/edit/arg(id)';" value="Edit"/>
 blockend(body)
 
 blockstart(footer)

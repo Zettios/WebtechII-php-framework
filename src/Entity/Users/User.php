@@ -104,6 +104,19 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function getUserWallet(int $id): array
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT w.wallet_id FROM wallet AS w WHERE w.user_id = ?');
+        $stmt->execute([$id]);
+        $result = $stmt->fetch();
+
+        if (is_bool($result)) {
+            $result = [];
+        }
+
+        return $result;
+    }
+
     public function getWallet(int $id, int $crypto_id): array
     {
         $stmt = $this->db->getPdo()->prepare('SELECT w.wallet_id, c.crypto_id, c.amount FROM user AS u, wallet AS w, crypto_in_wallet AS c 
@@ -117,6 +130,13 @@ class User extends DatabaseEntity
         }
 
         return $result;
+    }
+
+    public function addCryptoWallet(int $wallet_id, int $crypto_id): array|bool
+    {
+        $stmt = $this->db->getPdo()->prepare('INSERT INTO crypto_in_wallet (wallet_id, crypto_id, amount) VALUES (?,?,?)');
+        $stmt->execute([$wallet_id, $crypto_id, 0.00000]);
+        return $stmt->fetch();
     }
 
     public function getNoneCryptoWallets(int $id): array|bool

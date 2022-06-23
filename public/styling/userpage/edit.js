@@ -29,19 +29,20 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(cryptos);
 
 
-        // fetch('http://127.0.0.1:8000/updateUser?username='+username.value+'&email='+email.value+'&password='+password.value+'',
-        //     {
-        //         method: 'PUT',
-        //     })
-        //     .then( resp => resp.json() )
-        //     .then( data => {
-        //         if (data['status'] === 200) {
-        //             alert("Gegevens geupdate!");
-        //         } else if (data['status'] === 403){
-        //             alert("Gebruikersnaam bestaat al.");
-        //         } else {
-        //             alert("Gebruikersnaam of wachtwoord is incorrect.");
-        //         }
-        //     })
+        fetch('http://127.0.0.1:8000/addWallet?wallet='+cryptos,
+            {
+                method: 'PUT',
+            })
+            .then( resp => resp.json() )
+            .then( data => {
+                if (data['status'] === 200) {
+                    var r = confirm("Gegevens geupdate!");
+                    if (r === true){
+                        window.location.reload();
+                    }
+                } else {
+                    alert("Error.");
+                }
+            })
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Controller\User;
 
+use App\Entity\Crypto;
 use App\Entity\CryptoInWallet;
 use App\Entity\Users\User;
 use App\Entity\Wallet;
@@ -64,5 +65,22 @@ class UserController extends AbstractController
         }
 
         return new Response('1.1', 403, textBody: '{"status": 403, "message": "Username already exists"}');
+    }
+
+    #[Route(path: "/addWallet", method: "PUT", accessLevel: "1")]
+    public function addWallet(ServerRequest $request, User $user, Crypto $crypto): Response
+    {
+        $params = $request->getQueryParams();
+        $walletToAdd = $params["wallet"];
+        $cookies = $request->getCookieParams();
+        if (!isset($cookies['id']) && !isset($cookies['accessRole'])) {
+            return new Response('1.1', 404, textBody: '{"status": 404, "message": "User not found"}');
+        }
+
+        $crypto_id = $crypto->getCryptoByName($walletToAdd);
+        $wallet_id = $user->getUserWallet($cookies['id']);
+        $result = $user->addCryptoWallet($wallet_id['wallet_id'], $crypto_id['crypto_id']);
+
+        return new Response('1.1', 403, textBody: '{"status": 200, "message": "'.$result.'"}');
     }
 }
