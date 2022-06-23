@@ -155,9 +155,9 @@ class User extends DatabaseEntity
 
     public function getAllUsers(): array
     {
-        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
-        $stmt->execute(["Enrico"]);
-        return $stmt->fetch();
+        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user');
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 
     public function loginUser(string $username, string $password): array

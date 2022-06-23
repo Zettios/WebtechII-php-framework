@@ -1,0 +1,18 @@
+extend(base-access.html)
+<br>
+blockstart(head)
+<title>User - BitTraders</title>
+<link rel="stylesheet" href="/styling/admin/admin.css">
+<script type="text/javascript" src="/styling/admin/admin.js"></script>
+blockend(head)
+blockstart(body)
+<h1 id="title">Users</h1>
+forloopstart(users)
+<div class="userbar">
+    <span>argfor(user_id)</span> | <span>argfor(name)</span> | <span>argfor(email)</span> | <span>argfor(password)</span> | <span>argfor(role)</span>
+</div>
+forloopend(users)
+blockend(body)
+
+blockstart(footer)
+blockend(footer)

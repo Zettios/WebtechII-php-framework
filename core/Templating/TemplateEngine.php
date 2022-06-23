@@ -183,7 +183,7 @@ class TemplateEngine
         $forBody = "";
 
 
-        $needle = "forarg(";
+        $needle = "argfor(";
         $lastPos = 0;
         $positions = array();
         $args = array();

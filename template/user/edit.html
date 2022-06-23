@@ -19,7 +19,7 @@ blockstart(body)
     Add wallet:
     <select id="cryptos">
         forloopstart(wallet)
-        <option value="forarg(crypto_name)">forarg(crypto_name)</option>
+        <option value="argfor(crypto_name)">argfor(crypto_name)</option>
         forloopend(wallet)
     </select>
     <button id="addWallet">Add</button>

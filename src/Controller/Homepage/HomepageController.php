@@ -4,8 +4,6 @@ namespace App\Controller\Homepage;
 
 use App\Entity\Users\User;
 use App\Entity\Wallet;
-use stdClass;
-use Webtek\Core\Http\Request;
 use Webtek\Core\Http\Response;
 use Webtek\Core\Http\ServerRequest;
 use Webtek\Core\Routing\AbstractController;
