@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `db_bit_traders` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `db_bit_traders`;
 -- MySQL dump 10.13  Distrib 8.0.28, for Win64 (x86_64)
 --
 -- Host: localhost    Database: db_bit_traders
@@ -40,7 +42,7 @@ CREATE TABLE `course_price` (
 
 LOCK TABLES `course_price` WRITE;
 /*!40000 ALTER TABLE `course_price` DISABLE KEYS */;
-INSERT INTO `course_price` VALUES (7,25.22230,'2022-10-06 16:36:05',1),(8,42.12350,'2022-10-06 16:36:05',2),(9,156.67800,'2022-10-06 16:36:05',3),(10,345.43200,'2022-10-06 16:36:05',4);
+INSERT INTO `course_price` VALUES (7,40.22230,'2022-10-06 16:36:05',1),(8,42.12350,'2022-10-06 16:36:05',2),(9,156.67800,'2022-10-06 16:36:05',3),(10,345.43200,'2022-10-06 16:36:05',4);
 /*!40000 ALTER TABLE `course_price` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -94,7 +96,7 @@ CREATE TABLE `crypto_in_wallet` (
 
 LOCK TABLES `crypto_in_wallet` WRITE;
 /*!40000 ALTER TABLE `crypto_in_wallet` DISABLE KEYS */;
-INSERT INTO `crypto_in_wallet` VALUES (1,1,25.00000),(1,2,10.00000),(2,3,5.00000),(3,1,69.42000),(3,4,17.69000),(4,2,9.11000),(4,3,6.66000);
+INSERT INTO `crypto_in_wallet` VALUES (1,1,25.00000),(1,2,10.00000),(2,3,5.00000),(3,1,69.42000),(3,4,17.69000),(4,2,9.11000),(4,3,6.66000),(5,1,4.00000),(5,4,23.00000),(7,1,0.00000);
 /*!40000 ALTER TABLE `crypto_in_wallet` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -134,13 +136,14 @@ CREATE TABLE `user` (
   `user_id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `email` varchar(45) NOT NULL,
-  `password` varchar(45) NOT NULL,
+  `password` varchar(160) NOT NULL,
   `role` int NOT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_id_UNIQUE` (`user_id`),
+  UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `user_role_idx` (`role`),
   CONSTRAINT `user_role` FOREIGN KEY (`role`) REFERENCES `roles` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -149,7 +152,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Enrico','enrico@gmail.com','password',2),(2,'Henk','henk@gmail.com','password',1),(3,'Bob','bob@yahoo.com','password',1),(4,'Lisa','lisa@yahoo.com','password',1);
+INSERT INTO `user` VALUES (1,'Enrico','enrico@gmail.com','$2y$10$asmi6GWnwtmDlcf091fxkOb1JGxKCkkr15MUzE2v2tlG4GmFFKc1u',2),(2,'Henk','henk@gmail.com','$2y$10$plKKe0xsQr/1Qq0USyj6rOd11r2s3uSpRdN/4rfKTlonj.qj/jLCu',1),(3,'Bob','bob@yahoo.com','$2y$10$Mw0cMJTV4bvoSE1T9WBUaO6hjWBmOzgnJXW.M0XZJC/IBg5nnWcVa',2),(4,'Lisar','lisa@yahoo.com','$2y$10$M4ZYQGE37UEsTnedYaMs8uqD0yHqsUMyolBTbqbKx8/jZaxcx4Qq6',1),(6,'Enrici','enrico@huigsloot.com','$2y$10$8fLLGyswT83lk7//.le7UeaJgMqyFQkYnuWOM8purWFi6PTD6exbu',1),(13,'Zettios','enricohuig@gmail.com','$2y$10$oeiVuaV36QNlnwIzmFGuyu6aOBFCFPn.Z3z.q7u7St3fRM1GfqG/W',2),(15,'Zett','zett@gmail.com','$2y$10$SsSgvd6SbGJCiIrBi9JvtOaMY5gtDAKUMhHgLZqib6ukqh8tefLuK',2);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -167,7 +170,7 @@ CREATE TABLE `wallet` (
   UNIQUE KEY `wallet_id_UNIQUE` (`wallet_id`),
   KEY `owner_wallet_idx` (`user_id`),
   CONSTRAINT `owner_wallet` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -176,7 +179,7 @@ CREATE TABLE `wallet` (
 
 LOCK TABLES `wallet` WRITE;
 /*!40000 ALTER TABLE `wallet` DISABLE KEYS */;
-INSERT INTO `wallet` VALUES (1,1),(2,2),(3,3),(4,4);
+INSERT INTO `wallet` VALUES (1,1),(2,2),(3,3),(4,4),(5,13),(7,15);
 /*!40000 ALTER TABLE `wallet` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -189,4 +192,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-10 16:37:45
+-- Dump completed on 2022-06-23 19:12:16
