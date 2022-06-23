@@ -5,9 +5,8 @@ document.addEventListener("DOMContentLoaded", function() {
         let email = document.querySelector("#email");
         let password = document.querySelector("#password");
 
-        console.log(username.value);
 
-        fetch('http://127.0.0.1:8000/updateUser?username='+username.value+'&email='+email.value+'&password='+password.value+'',
+        fetch('http://127.0.0.1:8000/updateUser?username='+username.value+'&email='+email.value+'&password='+password.value.trim()+'',
             {
                 method: 'PUT',
             })

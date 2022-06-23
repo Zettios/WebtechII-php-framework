@@ -41,7 +41,7 @@ class AdminController extends AbstractController
             return new Response('1.1', 404, textBody: '{"status": 404, "message": "User not found"}');
         }
 
-        if ($user->checkUsernameAdmin($id, $username)) {
+        if ($user->checkUsername($id, $username)) {
             $user->updateUserAdmin($id, $username, $email, $password, $role);
             return new Response('1.1', 200, textBody: '{"status": 200, "message": "Success"}');
         }

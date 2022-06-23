@@ -90,14 +90,7 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
-    public function checkUsername(string $username): array|bool
-    {
-        $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
-        $stmt->execute([$username]);
-        return $stmt->fetch();
-    }
-
-    public function checkUsernameAdmin(int $id, string $username): bool
+    public function checkUsername(int $id, string $username): bool
     {
         $stmt = $this->db->getPdo()->prepare('SELECT * FROM user WHERE name = ?');
         $stmt->execute([$username]);
@@ -112,8 +105,15 @@ class User extends DatabaseEntity
 
     public function updateUser(int $id, string $username, string $email, string $password): array|bool
     {
-        $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, password = ? WHERE user_id = ?');
-        $stmt->execute([$username, $email, $password, $id]);
+        if (empty($password)) {
+            $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ? WHERE user_id = ?');
+            $stmt->execute([$username, $email, $id]);
+        } else {
+            $password = password_hash($password,PASSWORD_BCRYPT);
+            $stmt = $this->db->getPdo()->prepare('UPDATE user SET name = ?, email = ?, password = ? WHERE user_id = ?');
+            $stmt->execute([$username, $email, $password, $id]);
+        }
+
         return $stmt->fetch();
     }
 

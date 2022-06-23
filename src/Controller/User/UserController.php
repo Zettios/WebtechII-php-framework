@@ -58,8 +58,7 @@ class UserController extends AbstractController
             return new Response('1.1', 404, textBody: '{"status": 404, "message": "User not found"}');
         }
 
-        if (is_bool($user->checkUsername($username))) {
-            $password = password_hash($password,PASSWORD_BCRYPT);
+        if ($user->checkUsername($cookies['id'], $username)) {
             $user->updateUser($cookies['id'], $username, $email, $password);
             return new Response('1.1', 200, textBody: '{"status": 200, "message": "Updated"}');
         }
