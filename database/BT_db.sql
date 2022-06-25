@@ -96,7 +96,7 @@ CREATE TABLE `crypto_in_wallet` (
 
 LOCK TABLES `crypto_in_wallet` WRITE;
 /*!40000 ALTER TABLE `crypto_in_wallet` DISABLE KEYS */;
-INSERT INTO `crypto_in_wallet` VALUES (1,1,25.00000),(1,2,10.00000),(2,3,5.00000),(3,1,69.42000),(3,4,17.69000),(4,2,9.11000),(4,3,6.66000),(5,1,4.00000),(5,4,23.00000),(7,1,0.00000);
+INSERT INTO `crypto_in_wallet` VALUES (1,1,20.00000),(1,2,10.00000),(2,3,5.00000),(3,1,69.42000),(3,4,17.69000),(4,2,9.11000),(4,3,6.66000),(7,1,0.00000),(9,1,25.00000),(9,2,69.00000),(9,4,42.00000);
 /*!40000 ALTER TABLE `crypto_in_wallet` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -143,7 +143,7 @@ CREATE TABLE `user` (
   UNIQUE KEY `name_UNIQUE` (`name`),
   KEY `user_role_idx` (`role`),
   CONSTRAINT `user_role` FOREIGN KEY (`role`) REFERENCES `roles` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +152,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Enrico','enrico@gmail.com','$2y$10$asmi6GWnwtmDlcf091fxkOb1JGxKCkkr15MUzE2v2tlG4GmFFKc1u',2),(2,'Henk','henk@gmail.com','$2y$10$plKKe0xsQr/1Qq0USyj6rOd11r2s3uSpRdN/4rfKTlonj.qj/jLCu',1),(3,'Bob','bob@yahoo.com','$2y$10$Mw0cMJTV4bvoSE1T9WBUaO6hjWBmOzgnJXW.M0XZJC/IBg5nnWcVa',2),(4,'Lisar','lisa@yahoo.com','$2y$10$M4ZYQGE37UEsTnedYaMs8uqD0yHqsUMyolBTbqbKx8/jZaxcx4Qq6',1),(6,'Enrici','enrico@huigsloot.com','$2y$10$8fLLGyswT83lk7//.le7UeaJgMqyFQkYnuWOM8purWFi6PTD6exbu',1),(13,'Zettios','enricohuig@gmail.com','$2y$10$oeiVuaV36QNlnwIzmFGuyu6aOBFCFPn.Z3z.q7u7St3fRM1GfqG/W',2),(15,'Zett','zett@gmail.com','$2y$10$SsSgvd6SbGJCiIrBi9JvtOaMY5gtDAKUMhHgLZqib6ukqh8tefLuK',2);
+INSERT INTO `user` VALUES (1,'Enricor','enrico@gmail.com','$2y$10$4CgYfkvdR1AkxUhZ23G4Ye9N4h6qHXu6k9a9uzvLPMP5QdhVtJRsm',2),(2,'Henk','henk@gmail.com','$2y$10$pEtQW1qb9VQzBTLYqbSKsOxLnUABcpd944yZPn8VczOsxSMo9ClM.',1),(3,'Bob','bob@yahoo.com','$2y$10$Mw0cMJTV4bvoSE1T9WBUaO6hjWBmOzgnJXW.M0XZJC/IBg5nnWcVa',2),(4,'Lisar','lisa@yahoo.com','$2y$10$M4ZYQGE37UEsTnedYaMs8uqD0yHqsUMyolBTbqbKx8/jZaxcx4Qq6',1),(6,'Enrici','enrico@huigsloot.com','$2y$10$8fLLGyswT83lk7//.le7UeaJgMqyFQkYnuWOM8purWFi6PTD6exbu',1),(15,'Zett','zett@gmail.com','$2y$10$.ATS5F6/zXODyv2kmwdLGeaVuVSK.N0j1aSF/iR59sBAxgft2nVCy',2),(17,'Enrico','enrico@huigsloot.com','$2y$10$Wt0daaSJBfdvpIJ91KrmV.vMYEjaIVXKJ4oji3w3ppszbwaAKaCh.',2);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -170,7 +170,7 @@ CREATE TABLE `wallet` (
   UNIQUE KEY `wallet_id_UNIQUE` (`wallet_id`),
   KEY `owner_wallet_idx` (`user_id`),
   CONSTRAINT `owner_wallet` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -179,7 +179,7 @@ CREATE TABLE `wallet` (
 
 LOCK TABLES `wallet` WRITE;
 /*!40000 ALTER TABLE `wallet` DISABLE KEYS */;
-INSERT INTO `wallet` VALUES (1,1),(2,2),(3,3),(4,4),(5,13),(7,15);
+INSERT INTO `wallet` VALUES (1,1),(2,2),(3,3),(4,4),(7,15),(9,17);
 /*!40000 ALTER TABLE `wallet` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -192,4 +192,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-06-23 19:12:16
+-- Dump completed on 2022-06-25 14:39:05
