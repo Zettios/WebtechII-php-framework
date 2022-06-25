@@ -69,9 +69,15 @@ class Container implements ContainerInterface
         }
     }
 
+    /**
+     * Get all controllers in the directory and stores them in an array
+     * @param string $dir Directory where all controllers are supposed to be
+     * @return int
+     * @throws \ReflectionException
+     */
     public function registerControllers(string $dir = "../src/Controller"): int
     {
-        $routes = $this->getConfig();
+        $routes = $this->getRouteConfig();
 
         if ($routes === null) {
             return 0;
@@ -101,7 +107,11 @@ class Container implements ContainerInterface
         return 1;
     }
 
-    public function getConfig(): ?object
+    /**
+     * Get the route config file and decodes it into JSON.
+     * @return object|null
+     */
+    public function getRouteConfig(): ?object
     {
         if (file_get_contents("../config/RouteConfig.json") === false) {
             echo "RouteConfig.json not found in folder config.";
@@ -111,6 +121,7 @@ class Container implements ContainerInterface
         $routes = file_get_contents("../config/RouteConfig.json");
         return json_decode($routes);
     }
+
 
     public function resolve(ReflectionClass|ReflectionMethod|ReflectionFunction $reflection, array $staticParameters = []): array
     {

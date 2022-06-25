@@ -18,7 +18,13 @@ class Router
         $this->container = $container;
     }
 
-    public function getRoute(array $controllers)
+    /**
+     * Reigsters all routes into an array
+     * @param array $controllers all the controllers arrays inside the service container
+     * @return void
+     * @throws \ReflectionException
+     */
+    public function registerRoutes(array $controllers): void
     {
         foreach ($controllers as $controller){
             $refl = new ReflectionClass($controller);
@@ -34,6 +40,14 @@ class Router
         }
     }
 
+    /**
+     * Creates the parameters for the function to call.
+     * If no route has been found, first checks if the route could be a slug route else return response.
+     * @param Request $request current request object
+     * @return array|Response
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function createParameters(Request $request): array|Response
     {
         $uri = $request->getUri()->getPath();
@@ -69,7 +83,6 @@ class Router
                     $methodParameters[$parameter->getName()] = $object;
                 } else {
                     if (array_key_exists($parameter->getName(), $routeToUse)) {
-
                         $methodParameters[$parameter->getName()] = $routeToUse[$parameter->getName()];
                     } else {
                         return new Response('1.1', 424, textBody: "Dependency '".$parameter->getName()."' not found");
@@ -124,11 +137,18 @@ class Router
         return $args;
     }
 
+    /**
+     * Calls the function that's paired with the current url.
+     * Check if the route also has a trailing / or is a slug url.
+     * @param Request $request current request object
+     * @param array $methodParameters
+     * @return array|Response
+     */
     public function getView(Request $request, array $methodParameters): array|Response
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
-        //$args = $this->createArguments($query);
+        $args = $this->createArguments($query);
         $requestMethod = $request->getMethod();
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
@@ -144,6 +164,7 @@ class Router
                     return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
                 }
             } else {
+                // Check if the route could be a slug route.
                 $routeToUse = $this->checkSlugLinks($uri, $requestMethod, $this->routes);
                 if (count($routeToUse) === 0) {
                     return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
@@ -152,12 +173,21 @@ class Router
                     $request = $request->withUri($newUri, true);
                     return $this->getView($request, $methodParameters);
                 }
-
-                //return new Response('1.1', 404, textBody: "Path '".$uri."' not found");;
             }
         }
     }
 
+    /**
+     * Calls the function that's connected to the current URL. Gets back the return of the function.
+     * If the return is of type Response, it will just return the body text.
+     * If the return is of type Array, it will split the response up into the body and the arguments given.
+     * @param string $requestMethod current request method
+     * @param string $uri current uri
+     * @param array $parameters current function parameters
+     * @return array|Response
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
     public function callControllerFunction(string $requestMethod, string $uri, array $parameters): array|Response
     {
         $class = $this->container->get($this->routes[$requestMethod][$uri][0]->getName());
@@ -180,6 +210,12 @@ class Router
         }
     }
 
+    /**
+     * Gets all the routes and then gets the function that belongs to the current route.
+     * Also creates the parameters of the method to be able to call the function.
+     * @param Request $request the current request object
+     * @return array|Response
+     */
     public function resolve(Request $request): array|Response
     {
         $controllers = $this->container->registeredControllers;
@@ -193,7 +229,7 @@ class Router
         }
 
         //Get the method routes
-        $this->getRoute($controllers);
+        $this->registerRoutes($controllers);
         if (count($this->routes) === 0) {
             return new Response('1.1', 404, textBody: "Controllers have no methods to process.");
         }
