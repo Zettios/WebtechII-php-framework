@@ -24,7 +24,8 @@ class Container implements ContainerInterface
 
     public array $registeredControllers = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->register(ContainerInterface::class, self::class);
         $this->createdClasses[ContainerInterface::class] = $this;
     }

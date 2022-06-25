@@ -28,11 +28,6 @@ class AuthorizationMiddleware implements MiddlewareInterface
 
         $accessLevel =  intval($attr['access']);
 
-//        echo "<pre>";
-//        var_dump($accessLevel)."<br>";
-//        var_dump($userAccess)."<br>";
-//        echo "</pre>";
-
         if ($accessLevel === -1) {
             return $handler->handle($request);
         } else {

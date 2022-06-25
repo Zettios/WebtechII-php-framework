@@ -25,11 +25,8 @@ class Request implements RequestInterface
                                 mixed $requestTarget = null)
     {
         $this->setMethod($method);
-
         $this->setUri($uri);
-
         $this->setMessage($protocolVersion, $headers, $body);
-
         $this->setRequestTarget($requestTarget);
     }
 
@@ -97,7 +94,6 @@ class Request implements RequestInterface
     public function getRequestTarget(): string
     {
         if (isset($this->requestTarget)) return $this->requestTarget;
-
         if (isset($this->uri)) return $this->uri->getPath() . ($this->uri->getQuery() ?? "");
 
         return "/";
@@ -179,13 +175,13 @@ class Request implements RequestInterface
     public function withUri(UriInterface $uri, $preserveHost = false): self
     {
         $new = clone $this;
-        if ($preserveHost) {
-            if ($this->uri->getHost() !== null){
-                if (!$uri->getHost() === null) {
-
-                }
-            }
-        }
+//        if ($preserveHost) {
+//            if ($this->uri->getHost() !== null){
+//                if (!$uri->getHost() === null) {
+//
+//                }
+//            }
+//        }
         $new->uri = $uri;
         return $new;
     }

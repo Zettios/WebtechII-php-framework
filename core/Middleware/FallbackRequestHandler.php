@@ -10,7 +10,10 @@ use Webtek\Core\Http\Response;
 class FallbackRequestHandler implements RequestHandlerInterface
 {
     
-    public function __construct(private NotFoundMiddleware $notFoundMiddleware) {}
+    public function __construct(private NotFoundMiddleware $notFoundMiddleware)
+    {
+
+    }
 
     /**
      * Handles a request and produces a response.

@@ -76,7 +76,6 @@ class Router
                     }
                 }
             }
-            //return new Response('1.1', 404, textBody: "Path '".$uri."' not found");
         }
         return $methodParameters;
     }
@@ -129,7 +128,7 @@ class Router
     {
         $uri = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
-        $args = $this->createArguments($query);
+        //$args = $this->createArguments($query);
         $requestMethod = $request->getMethod();
 
         if (array_key_exists($uri, $this->routes[$requestMethod])){
@@ -199,17 +198,11 @@ class Router
             return new Response('1.1', 404, textBody: "Controllers have no methods to process.");
         }
 
-
         //Make the parameters of the method
         $methodParameters = $this->createParameters($request);
         if (is_a($methodParameters, Response::class)) {
             return $methodParameters;
         }
-
-//        echo "<pre>";
-//        print_r($this->routes);
-//        echo "</pre>";
-
 
         //Execute the method
         return $this->getView($request, $methodParameters);

@@ -12,7 +12,10 @@ use Webtek\Core\Templating\TemplateEngine;
 class TemplatingMiddleware implements MiddlewareInterface
 {
 
-    public function __construct(private TemplateEngine $templateEngine) {}
+    public function __construct(private TemplateEngine $templateEngine)
+    {
+
+    }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -31,7 +34,6 @@ class TemplatingMiddleware implements MiddlewareInterface
 
             // === Argument handling ==
             if (array_key_exists("args", $body)) {
-
                 $body["webpage"] = $this->templateEngine->processArguments($body["webpage"], $body["args"]);
                 $body["webpage"] = $this->templateEngine->processForloops($body["webpage"], $body["args"]);
                 $body["webpage"] = $this->templateEngine->processCompare($body["webpage"], $body["args"]);

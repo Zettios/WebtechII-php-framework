@@ -131,6 +131,34 @@ class User extends DatabaseEntity
         return $stmt->fetch();
     }
 
+    public function deleteUserAdmin(int $id): int
+    {
+        $stmt = $this->db->getPdo()->prepare('SELECT user_id FROM user WHERE user_id = ?');
+        $stmt->execute([$id]);
+        $userResult = $stmt->fetch();
+
+        $stmt = $this->db->getPdo()->prepare('SELECT wallet_id FROM wallet WHERE user_id = ?');
+        $stmt->execute([$userResult['user_id']]);
+        $walletResult = $stmt->fetch();
+
+        $stmt = $this->db->getPdo()->prepare('DELETE FROM crypto_in_wallet WHERE wallet_id = ?');
+        $stmt->execute([$walletResult['wallet_id']]);
+        $stmt = $this->db->getPdo()->prepare('DELETE FROM wallet WHERE user_id = ?');
+        $stmt->execute([$userResult['user_id']]);
+        $stmt = $this->db->getPdo()->prepare('DELETE FROM user WHERE user_id = ?');
+        $stmt->execute([$userResult['user_id']]);
+
+        $stmt = $this->db->getPdo()->prepare('SELECT user_id FROM user WHERE user_id = ?');
+        $stmt->execute([$id]);
+        $userResult = $stmt->fetch();
+
+        if (is_bool($userResult)) {
+           return 200;
+        }
+
+        return 404;
+    }
+
     public function getUserWallet(int $id): array
     {
         $stmt = $this->db->getPdo()->prepare('SELECT w.wallet_id FROM wallet AS w WHERE w.user_id = ?');

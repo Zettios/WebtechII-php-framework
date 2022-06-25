@@ -229,11 +229,6 @@ class ServerRequest extends Request implements ServerRequestInterface
      */
     public function getParsedBody(): null|array|object
     {
-
-        //stap 1: check if content-type is application/x-www-form-urlencoded or multipart/form-data. Yes: return $_POST superglobal
-        //stap 2: If not, check body with fopen stream thingie.
-        //stap 3: If fopen returns content, save it as an object and return. If nothing is found, return null
-
         return $this->parsedBody;
     }
 

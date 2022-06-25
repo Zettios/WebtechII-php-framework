@@ -13,11 +13,13 @@ class StackRequestHandler implements RequestHandlerInterface
     private array $stack = [];
     private RequestHandlerInterface $fallbackHandler;
 
-    public function __construct(FallbackRequestHandler $fallbackHandler) {
+    public function __construct(FallbackRequestHandler $fallbackHandler)
+    {
         $this->fallbackHandler = $fallbackHandler;
     }
 
-    public function add(MiddlewareInterface $requestHandler) {
+    public function add(MiddlewareInterface $requestHandler)
+    {
         $this->stack[] = $requestHandler;
     }
 

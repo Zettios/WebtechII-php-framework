@@ -48,4 +48,27 @@ class AdminController extends AbstractController
 
         return new Response('1.1', 403, textBody: '{"status": 403, "message": "Username already exists"}');
     }
+
+    #[Route(path: "/deleteUserAdmin", method: "PUT", accessLevel: "2")]
+    public function deleteUserAdmin(ServerRequest $request, User $user): Response
+    {
+        $params = $request->getQueryParams();
+        $id = $params['user_id'];
+
+        $cookies = $request->getCookieParams();
+        if (!isset($cookies['id']) && !isset($cookies['accessRole'])) {
+            return new Response('1.1', 404, textBody: '{"status": 404, "message": "User not found"}');
+        }
+
+        if ($user->deleteUserAdmin($id) === 200) {
+            if ($id === $cookies['id']) {
+                setcookie('id', '', time() - 3600);
+                setcookie('accessRole', '', time() - 3600);
+                return new Response('1.1', 200, textBody: '{"status": 205, "message": "Success, but logout"}');
+            }
+            return new Response('1.1', 200, textBody: '{"status": 200, "message": "Success"}');
+        }
+
+        return new Response('1.1', 403, textBody: '{"status": 403, "message": "Failed to delete"}');
+    }
 }

@@ -65,7 +65,7 @@ class CryptoController extends AbstractController
         $currentCrypto = $crypto->getSingleCrypto($crypto_id);
         $wallet = $user->getWallet($id, $crypto_id);
 
-        if ($amountToBuy <= $currentCrypto['value']) {
+        if ($amountToBuy > 0.00000 && $amountToBuy <= $currentCrypto['value']) {
             $crypto->updateCryptoValue($crypto_id, $currentCrypto['value']-$amountToBuy);
             $crypto->updateWallet($wallet['wallet_id'], $crypto_id, $wallet['amount']+$amountToBuy);
             return new Response('1.1', 200, textBody: '{"status": 200, "message": "Success"}');
@@ -101,7 +101,7 @@ class CryptoController extends AbstractController
     {
         $params = $request->getQueryParams();
         $crypto_id = $params["crypto_id"];
-        $amountToSell = $params["buy_amount"];
+        $amountToSell = $params["sell_amount"];
 
         $cookies = $request->getCookieParams();
         if (!isset($cookies['id']) && !isset($cookies['accessRole'])) {
@@ -112,7 +112,7 @@ class CryptoController extends AbstractController
         $currentCrypto = $crypto->getSingleCrypto($crypto_id);
         $wallet = $user->getWallet($id, $crypto_id);
 
-        if ($amountToSell <= $wallet['amount'] && $amountToSell <= $currentCrypto['value']) {
+        if ($amountToSell > 0.00000 && $amountToSell <= $wallet['amount']) {
             $crypto->updateCryptoValue($crypto_id, $currentCrypto['value']+$amountToSell);
             $crypto->updateWallet($wallet['wallet_id'], $crypto_id, $wallet['amount']-$amountToSell);
             return new Response('1.1', 200, textBody: '{"status": 200, "message": "Success"}');

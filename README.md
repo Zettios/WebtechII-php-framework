@@ -9,5 +9,5 @@ wanneer jullie het nakijken.
 
 Meeste accounts hebben het wachtwoord 'password'. Als dat niet werkt, dan is het 'test'.
 Eén admin account is:
-Gebruikersnaam: Zettios
+Gebruikersnaam: Enrico
 Wachtwoord: password
